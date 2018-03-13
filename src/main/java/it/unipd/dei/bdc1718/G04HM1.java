@@ -9,9 +9,10 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class FirstHomework2 {
-
+public class G04HM1 {
     public static void main(String[] args) throws FileNotFoundException {
+
+        //  POINT 1
         if (args.length == 0) {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
@@ -32,19 +33,17 @@ public class FirstHomework2 {
         // Create a parallel collection
         JavaRDD<Double> dNumbers = sc.parallelize(lNumbers);
 
-        double sumOfSquares = dNumbers.map(Operations::pow2).reduce(Operations::sum);
-        System.out.println("The sum of squares is " + sumOfSquares);
 
-    }
+        // POINT 2
 
-    static class Operations {
-        static double pow2(double x){
-            return Math.pow(x,2);
-        }
+        //In the variable sum I store the sum of the mean of the elements of the data set
+        double mean = dNumbers.reduce((x, y) -> x + y)/dNumbers.count();
+        System.out.println("Average: "+mean);
 
-        static double sum(double x, double y){
-            return x+y;
-        }
+        JavaRDD<Double> dDiffavgs = dNumbers.map((x) -> Math.abs(mean-x));
+        dDiffavgs.foreach((x) -> System.out.println(x));
+
+
     }
 
 }
