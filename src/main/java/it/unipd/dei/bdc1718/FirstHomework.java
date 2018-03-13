@@ -26,7 +26,7 @@ public class FirstHomework {
 
     // Setup Spark
     SparkConf conf = new SparkConf(true)
-      .setAppName("Preliminaries");
+            .setAppName("Preliminaries");
     JavaSparkContext sc = new JavaSparkContext(conf);
 
     // Create a parallel collection
