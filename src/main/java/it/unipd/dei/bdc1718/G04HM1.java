@@ -45,13 +45,13 @@ public class G04HM1 {
 
         //  POINT 3
         //with a map-reduce function
-        double min1 = dNumbers.reduce((x,y) -> x<=y?x:y);
+        double min1 = dDiffavgs.reduce((x,y) -> x<=y?x:y);
         System.out.println("Minimum computed with method 1: "+min1);
 
         double min2=-1;
         /*
         //ERRORE
-        double min2 = dNumbers.min(new Comparator<Double>() {                            //anonymous inner class
+        double min2 = dNumbers.min(new Comparator<Double> () {                            //anonymous inner class
             public int compare(Double x, Double y) {
                 return x-y==0?0:x<y?-1:1;
             }
