@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.scalanlp:breeze-macros_2.11:0.13.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.scalanlp/breeze-macros_2.11/0.13.1/7f8bd9f5b80b7b9bea5a0dbd8570b50a5ff7fbe3/breeze-macros_2.11-0.13.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.scalanlp/breeze-macros_2.11/0.13.1/d64e459d780b9017ca03ba1aca41132b0addfb53/breeze-macros_2.11-0.13.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
