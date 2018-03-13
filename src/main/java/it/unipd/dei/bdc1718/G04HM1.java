@@ -43,32 +43,17 @@ public class G04HM1 {
         JavaRDD<Double> dDiffavgs = dNumbers.map((x) -> Math.abs(mean - x));
         dDiffavgs.foreach((x) -> System.out.println(x));
 
-
-        //  POINT 3
-        //with a map-reduce function
+        // POINT 3
+        // with a map-reduce function
         double min1 = dDiffavgs.reduce((x, y) -> x <= y ? x : y);
         System.out.println("Minimum computed with method 1: " + min1);
 
-        double min2 = -1;
-        min2 = dDiffavgs.min(new DoubleComparator());
-        /*
-        //ERROR
-        double min2 = dNumbers.min(new Comparator<Double> () {                            //anonymous inner class
-            public int compare(Double x, Double y) {
-                return x-y==0?0:x<y?-1:1;
-            }
-
-        });
-        */
-
-
-        /*
-        //NotSerializableException
-        min2 = dNumbers.min((x,y) -> (x-y==0?0:x<y?-1:1));
-        */
+        // using min function
+        double min2 = dDiffavgs.min(new DoubleComparator());
         System.out.println("Minimum computed with method 2: " + min2);
 
     }
+    // auxiliary class to allow Comparator to be Serializable
     public static class DoubleComparator implements Serializable, Comparator<Double> {
 
         public int compare(Double a, Double b) {
