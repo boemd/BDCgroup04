@@ -100,13 +100,18 @@ public class G04HM1 {
 
         // Writing difference from mean mean to file
         try {
-            w.write("POINT 1 \r\n");
+            w.write("-- POINT 2 --" + "\r\n");
+            w.newLine();
+
             // Writing mean to file
             w.write("Mean of dataset is: " + mean + "\r\n");
             w.newLine();
 
+            w.write("-- POINT 3 --" + "\r\n");
+            w.newLine();
+
             // Writing difference wrt the mean
-            w.write("Difference with respect to the mean is:" + "\r\n");
+            w.write("Points and distance with respect to the mean are:" + "\r\n");
             for (int i = 0; i < diffAvgs.size(); i++) {
                 w.write(numbers.get(i).toString() + " : " + diffAvgs.get(i).toString() + "\r\n");
             }
@@ -116,10 +121,11 @@ public class G04HM1 {
             w.write("Minimum distance is: " +min1 + "\r\n");
             w.newLine();
 
-            w.write("POINT 4" + "\r\n");
+            w.write("-- POINT 4 --" + "\r\n");
+            w.newLine();
 
             // Writing max distance
-            w.write("Maximum distance is: " +max + "\r\n");
+            w.write("Maximum value in dataset is: " + max + "\r\n");
             w.newLine();
 
             // Writing sorted dataset (increasing order)
@@ -134,7 +140,7 @@ public class G04HM1 {
             w.newLine();
 
             // Writing remaining numbers after filter
-            w.write("Remaining numbers after filtering are:" + "\r\n");
+            w.write("Remaining numbers after filtering (and distance from the mean) are:" + "\r\n");
             for (int i = 0; i < filtered.size(); i++) {
                 double a = filtered.get(i);
                 w.write(a + " : " + Math.abs(a-mean) + "\r\n");
