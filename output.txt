@@ -1,0 +1,29 @@
+-- POINT 2 --
+
+Mean of dataset is: 2.5
+
+-- POINT 3 --
+
+Points and distance with respect to the mean are:
+1.0 : 1.5
+2.0 : 0.5
+3.0 : 0.5
+4.0 : 1.5
+
+Minimum distance is: 0.5
+
+-- POINT 4 --
+
+Maximum value in dataset is: 4.0
+
+Ordered dataset (increasing way) is:
+1.0
+2.0
+3.0
+4.0
+
+Variance of dataset is: 1.6666666666666667
+
+Remaining numbers after filtering (and distance from the mean) are:
+2.0 : 0.5
+3.0 : 0.5
