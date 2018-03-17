@@ -43,14 +43,17 @@ public class G04HM1 {
         // Computing the mean using a reduce (sum all elements and then divide by the cardinality) function
         // If the Map function is an identity function, we omit it
         double mean = dNumbers.reduce((x, y) -> x + y) / dNumbers.count();
-        System.out.println("Average: " + mean);
+        System.out.println("--- POINT 2 ---" + "\n");
+        System.out.println("Mean of dataset is:  " + mean + "\n");
 
         // Create a JavaRDD containing the absolute value of the difference between a number and the mean
         JavaRDD<Double> dDiffavgs = dNumbers.map((x) -> Math.abs(mean - x));
 
         // The method foreach(VoidFunction<T> f) allows us to pass in input a function whose return type is void
         // Here we print the values contained in dDiffavgs (we do this because the dataset in very small)
+        System.out.println("Distances from the mean are:");
         dDiffavgs.foreach((x) -> System.out.println(x));
+        System.out.println();
 
         //  - - - - - - POINT 3 - - - - - -
         // Compute minimum using a map-reduce function
@@ -61,7 +64,9 @@ public class G04HM1 {
                 return y;
             }
         });
-        System.out.println("Minimum computed with method 1: " + min1);
+
+        System.out.println("\n" + "--- Point 3 ---" + "\n");
+        System.out.println("Minimum computed with method 1: " + min1 + "\n");
 
         // Compute minimum using min function
         double min2 = dDiffavgs.min(new DoubleComparator());
@@ -76,18 +81,24 @@ public class G04HM1 {
                 return y;
             }
         });
-        System.out.println("Maximum: " + max);
+
+        System.out.println("\n" + "--- Point 4 ---" + "\n");
+
+        System.out.println("Maximum value in dataset is: " + max + "\n");
 
         // Sort the elements of dNumbers in ascending order
         JavaRDD<Double> dSorted = dNumbers.sortBy(x -> x, true, 1);
+        System.out.println("Ordered dataset (increasing way) is:");
         dSorted.foreach((x) -> System.out.println(x));
+        System.out.println();
 
         // Compute the variance of dNumbers
         double variance = dNumbers.map(x -> Math.pow(x - mean, 2)).reduce((x, y) -> x + y) / (dNumbers.count() - 1);
-        System.out.println("Variance: " + variance);
+        System.out.println("Variance: " + variance + "\n");
 
         // Filtering to keep only numbers which are in the range (mean-1 ; mean+1)
         JavaRDD<Double> dFiltered = dNumbers.filter((x) -> Math.abs(x - mean) < 1);
+        System.out.println("Remaining numbers after filtering (and distance from the mean) are:");
         dFiltered.foreach((x) -> System.out.println(x));
 
         // FileWriter and BufferedWriter initialization
@@ -124,7 +135,7 @@ public class G04HM1 {
             w.newLine();
 
             // Writing min distance
-            w.write("Minimum distance is: " +min1 + "\r\n");
+            w.write("Minimum distance (either using method 1 or 2) is: " +min1 + "\r\n");
             w.newLine();
 
             w.write("-- POINT 4 --" + "\r\n");
