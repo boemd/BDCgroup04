@@ -94,7 +94,7 @@ public class G04HM1 {
 
         // Compute the variance of dNumbers
         double variance = dNumbers.map(x -> Math.pow(x - mean, 2)).reduce((x, y) -> x + y) / (dNumbers.count() - 1);
-        System.out.println("Variance: " + variance + "\n");
+        System.out.println("Variance of dataset is: " + variance + "\n");
 
         // Filtering to keep only numbers which are in the range (mean-1 ; mean+1)
         JavaRDD<Double> dFiltered = dNumbers.filter((x) -> Math.abs(x - mean) < 1);
