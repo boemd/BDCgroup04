@@ -99,7 +99,7 @@ public class G04HM1 {
         // Filtering to keep only numbers which are in the range (mean-1 ; mean+1)
         JavaRDD<Double> dFiltered = dNumbers.filter((x) -> Math.abs(x - mean) < 1);
         System.out.println("Remaining numbers after filtering (and distance from the mean) are:");
-        dFiltered.foreach((x) -> System.out.println(x));
+        dFiltered.foreach((x) -> System.out.println(x + " : " + + Math.abs(x-mean)));
 
         // FileWriter and BufferedWriter initialization
         FileWriter d = null;
