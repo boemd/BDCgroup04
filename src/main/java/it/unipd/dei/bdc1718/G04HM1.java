@@ -16,7 +16,8 @@ import java.util.Scanner;
 
 public class G04HM1 {
     public static void main(String[] args) throws FileNotFoundException {
-        //  POINT 1
+
+        //  - - - - - - POINT 1 - - - - - -
         if (args.length == 0) {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
@@ -38,20 +39,20 @@ public class G04HM1 {
         // Create a parallel collection
         JavaRDD<Double> dNumbers = sc.parallelize(lNumbers);
 
-        // POINT 2
+        //  - - - - - - POINT 2 - - - - - -
         // Computing the mean using a reduce (sum all elements and then divide by the cardinality) function
         // If the Map function is an identity function, we omit it
         double mean = dNumbers.reduce((x, y) -> x + y) / dNumbers.count();
         System.out.println("Average: " + mean);
 
-        // Ccreate a JavaRDD containing the absolute value of the difference between a number and the mean
+        // Create a JavaRDD containing the absolute value of the difference between a number and the mean
         JavaRDD<Double> dDiffavgs = dNumbers.map((x) -> Math.abs(mean - x));
+
         // The method foreach(VoidFunction<T> f) allows us to pass in input a function whose return type is void
-        // here we print the values contained in dDiffavgs
-        // We do this because the dataset in very small
+        // Here we print the values contained in dDiffavgs (we do this because the dataset in very small)
         dDiffavgs.foreach((x) -> System.out.println(x));
 
-        // POINT 3
+        //  - - - - - - POINT 3 - - - - - -
         // Compute minimum using a map-reduce function
         double min1 = dDiffavgs.reduce((x, y) -> {
             if (x <= y) {
@@ -66,7 +67,7 @@ public class G04HM1 {
         double min2 = dDiffavgs.min(new DoubleComparator());
         System.out.println("Minimum computed with method 2: " + min2);
 
-        // POINT 4
+        //  - - - - - - POINT 4 - - - - - -
         // Compute maximum (over numbers) using a map-reduce function
         double max = dNumbers.reduce((x, y) -> {
             if (x >= y) {
@@ -85,7 +86,7 @@ public class G04HM1 {
         double variance = dNumbers.map(x -> Math.pow(x - mean, 2)).reduce((x, y) -> x + y) / (dNumbers.count() - 1);
         System.out.println("Variance: " + variance);
 
-        // Filtering to keep only numbers which are at most far mean+1
+        // Filtering to keep only numbers which are in the range (mean-1 ; mean+1)
         JavaRDD<Double> dFiltered = dNumbers.filter((x) -> Math.abs(x - mean) < 1);
         dFiltered.foreach((x) -> System.out.println(x));
 
