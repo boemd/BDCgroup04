@@ -10,7 +10,7 @@ Points and distance with respect to the mean are:
 3.0 : 0.5
 4.0 : 1.5
 
-Minimum distance is: 0.5
+Minimum distance (either using method 1 or 2) is: 0.5
 
 -- POINT 4 --
 
