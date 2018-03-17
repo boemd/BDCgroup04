@@ -40,14 +40,15 @@ public class G04HM1 {
 
         // POINT 2
         // Computing the mean using a reduce (sum all elements and then divide by the cardinality) function
-        // If the Map function is an identity function, we omit it
+        // When the Map function is an identity function, we omit it
         double mean = dNumbers.reduce((x, y) -> x + y) / dNumbers.count();
+        System.out.println("--- POINT 2 ---" + "\r\n");
         System.out.println("Average: " + mean);
 
         // Ccreate a JavaRDD containing the absolute value of the difference between a number and the mean
         JavaRDD<Double> dDiffavgs = dNumbers.map((x) -> Math.abs(mean - x));
         // The method foreach(VoidFunction<T> f) allows us to pass in input a function whose return type is void
-        // here we print the values contained in dDiffavgs
+        // Here we print the values contained in dDiffavgs
         // We do this because the dataset in very small
         dDiffavgs.foreach((x) -> System.out.println(x));
 
@@ -60,6 +61,8 @@ public class G04HM1 {
                 return y;
             }
         });
+
+        System.out.println("\r\n" + "--- POINT 3 ---" + "\r\n");
         System.out.println("Minimum computed with method 1: " + min1);
 
         // Compute minimum using min function
@@ -75,6 +78,8 @@ public class G04HM1 {
                 return y;
             }
         });
+
+        System.out.println("\r\n" + "--- POINT 4 ---" + "\r\n");
         System.out.println("Maximum: " + max);
 
         // Sort the elements of dNumbers in ascending order
