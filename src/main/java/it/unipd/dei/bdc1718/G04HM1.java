@@ -5,6 +5,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Serializable;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +29,8 @@ public class G04HM1 {
         s.close();
 
         // Setup Spark
+        Logger.getLogger("org").setLevel(Level.OFF);
+        Logger.getLogger("akka").setLevel(Level.OFF);
         SparkConf conf = new SparkConf(true)
                 .setAppName("Preliminaries");
         JavaSparkContext sc = new JavaSparkContext(conf);
@@ -154,9 +159,12 @@ public class G04HM1 {
     // Auxiliary class which allows Comparator to be Serializable
     public static class DoubleComparator implements Serializable, Comparator<Double> {
         public int compare(Double a, Double b) {
-            if (a < b) return -1;
-            else if (a > b) return 1;
-            return 0;
+            if (a < b)
+                return -1;
+            else if (a > b)
+                return 1;
+            else
+                return 0;
 
             /*
             Or, as an exotic alternative
