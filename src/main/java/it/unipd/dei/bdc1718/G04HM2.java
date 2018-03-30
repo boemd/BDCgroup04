@@ -12,4 +12,16 @@ import java.util.*;
 import java.io.*;
 
 public class G04HM2 {
+    public static void main(String[] args){
+        if (args.length == 0) {
+            throw new IllegalArgumentException("Expecting the file name on the command line");
+        }
+
+        // Setup Spark
+        Logger.getLogger("org").setLevel(Level.OFF);
+        Logger.getLogger("akka").setLevel(Level.OFF);
+        SparkConf conf = new SparkConf(true)
+                .setAppName("Preliminaries");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+    }
 }
