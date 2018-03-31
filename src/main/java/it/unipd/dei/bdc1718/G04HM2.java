@@ -16,6 +16,7 @@ public class G04HM2 {
         if (args.length == 0) {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
+        String path = args[0];
 
         // Setup Spark
         Logger.getLogger("org").setLevel(Level.OFF);
@@ -23,5 +24,52 @@ public class G04HM2 {
         SparkConf conf = new SparkConf(true)
                 .setAppName("Preliminaries");
         JavaSparkContext sc = new JavaSparkContext(conf);
+
+        //load a text file into an RDD of strings, where each string corresponds to a distinct line of the file
+        int numPartitions = sc.defaultParallelism();
+        JavaRDD<String> lines = sc.textFile(path, numPartitions);
+
+        JavaPairRDD<String,Long> docs = lines.flatMapToPair((document)-> {
+            //I split each document in words and I count the repetitions in the document
+            String[] tokens = document.split(" ");
+            ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
+            for (String token : tokens) {
+                //I iterate on the list to see if the current token has already been added
+                ListIterator<Tuple2<String, Long>> itr = pairs.listIterator();
+                boolean done=false;
+                while(itr.hasNext()){
+                    Tuple2<String,Long> elem = itr.next();
+                    //if the token is present, its value gets incremented by 1
+                    if(elem._1().equals(token)){
+                        itr.set(new Tuple2<>(elem._1(),elem._2()+1L));
+                        done=true;
+                        break;
+                    }
+                }
+                //if the token is not found, I add it with value 1
+                if(!done){
+                    pairs.add(new Tuple2<>(token, 1L));
+                }
+            }
+            return pairs.iterator();
+        })
+        .groupByKey()
+        .mapValues((it)-> {
+            long sum = 0;
+            for (long c : it)
+                sum += c;
+            return sum;
+        })
+        .sortByKey();
+
+        List<Tuple2<String, Long>> counts = docs.collect();
+
+
+        counts.forEach((tuple) -> {
+            String word = tuple._1();
+            long count = tuple._2();
+            System.out.println(word + " :: " + count);
+        });
+
     }
 }
