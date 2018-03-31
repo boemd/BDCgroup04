@@ -35,10 +35,13 @@ public class G04HM2 {
         // ----------------------- IMPROVED WORD COUNT 1 -----------------------
 
         JavaRDD<String> lines = sc.textFile(path, numPartitions).cache();   // Added .cache() to force the loading of
-                                                                            // the file before the stopwatch is started
-        lines.count();
+        lines.count();                                                      // the file before the stopwatch is started
+
         // Now the RDD has been loaded and cached in memory and we can start measuring time
         long start = System.currentTimeMillis();
+
+        // "docs" è una variabile inutilizzata, mettendo dentro commento "JavaPairRDD<String,Long> docs" dovrebbe
+        // funzionare tutto comunque
         JavaPairRDD<String,Long> docs = lines.flatMapToPair((document)-> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
@@ -86,6 +89,42 @@ public class G04HM2 {
 //        });
 
         // ----------------------- IMPROVED WORD COUNT 2 -----------------------
+
+        long word_occurrences = 3503570;
+        long sqrtN = (long)Math.sqrt(word_occurrences);     // We need a key which is a random value in [0,sqrtN)
+
+        start = System.currentTimeMillis();
+
+        JavaPairRDD<String,Long> MapImprWC2 = lines.flatMapToPair((document)-> {
+            // I split each document in words and I count the repetitions in the document
+            String[] tokens = document.split(" ");
+            ArrayList<Tuple2<Long, Tuple2<String, Long>>> triplet = new ArrayList<>();
+            for (String token : tokens) {
+                //I iterate on the list to see if the current token has already been added
+                ListIterator<Tuple2<Long, Tuple2<String, Long>>> itr = triplet.listIterator();
+                boolean done=false;
+                while(itr.hasNext()){
+                    Tuple2<Long, Tuple2<String, Long>> elem = itr.next();
+                    //if the token is present, its value gets incremented by 1
+                    if(elem._2._1().equals(token)){
+                        Tuple2<String, Long> supp = new Tuple2<>(elem._2._1(),elem._2._2()+1L);
+                        itr.set(new Tuple2<>(elem._1(),new Tuple2<>(supp._1(),supp._2())));
+                        done=true;
+                        break;
+                    }
+                }
+                //if the token is not found, I add it with value 1
+                if(!done){
+                    long xKey = (long)(Math.random() * (sqrtN));
+                    triplet.add(new Tuple2<>(xKey,new Tuple2<>(token, 1L)));
+                }
+            }
+            return triplet.iterator();
+        })
+        // long xKey = (long)(Math.random() * (sqrtN));
+
+        end = System.currentTimeMillis();
+        System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
 
     }
 }
