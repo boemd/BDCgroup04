@@ -1,26 +1,3 @@
-/*
-
-Assignment
-Create a program GxxHM2.java (for Java users) or GxxHM2.py (for Python users), where xx is your two-digit group number,
-which receives in input a collection of documents, represented as a text file (one line per document) whose name is
-provided on the command line, and does the following things:
-
-1. Runs 3 versions of MapReduce word count and returns their individual running times, carefully measured:
-    - a version that implements the Improved Word count 1 described in class.
-    - a version that implements the Improved Word count 2 described in class.
-    - a version that uses the reduceByKey method.
-Try to make each version as fast as possible. You can test it on the text-sample.txt file you downloaded earlier or
-even on a much larger file you can create yourself.
-
-2. Asks the user to input an integer k and returns the k most frequent words (i.e., those with largest counts), with
-ties broken arbitrarily.
-Add short but explicative comments to your code and when you print a value print also a short description of what that
-value is.
-
-Return the file with your program by mail to bdc-course@dei.unipd.it
-
-*/
-
 package it.unipd.dei.bdc1718;
 
 import org.apache.log4j.Logger;
@@ -35,36 +12,64 @@ import java.util.*;
 import java.io.*;
 
 public class G04HM2 {
-    public static void main(String[] args) throws FileNotFoundException {
-
-        // ---------------------CODICE DI DARIO--------------------------
-
-        // Parse the path to the data
+    public static void main(String[] args){
+        if (args.length == 0) {
+            throw new IllegalArgumentException("Expecting the file name on the command line");
+        }
         String path = args[0];
 
-        // Initialize Spark
+        // Setup Spark
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
-        SparkConf sparkConf = new SparkConf(true).setAppName("Basic Word Count");
-        JavaSparkContext sc = new JavaSparkContext(sparkConf);
+        SparkConf conf = new SparkConf(true)
+                .setAppName("Preliminaries");
+        JavaSparkContext sc = new JavaSparkContext(conf);
 
-        // Read the data from the text file
+        //load a text file into an RDD of strings, where each string corresponds to a distinct line of the file
         int numPartitions = sc.defaultParallelism();
-        JavaRDD<String> dDocs = sc.textFile(path, numPartitions);
+        JavaRDD<String> lines = sc.textFile(path, numPartitions);
 
-        // Iterator
-        JavaRDD<String> dWords = dDocs.flatMap((doc) -> Arrays.stream(doc.split(" ")).iterator());
+        JavaPairRDD<String,Long> docs = lines.flatMapToPair((document)-> {
+            //I split each document in words and I count the repetitions in the document
+            String[] tokens = document.split(" ");
+            ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
+            for (String token : tokens) {
+                //I iterate on the list to see if the current token has already been added
+                ListIterator<Tuple2<String, Long>> itr = pairs.listIterator();
+                boolean done=false;
+                while(itr.hasNext()){
+                    Tuple2<String,Long> elem = itr.next();
+                    //if the token is present, its value gets incremented by 1
+                    if(elem._1().equals(token)){
+                        itr.set(new Tuple2<>(elem._1(),elem._2()+1L));
+                        done=true;
+                        break;
+                    }
+                }
+                //if the token is not found, I add it with value 1
+                if(!done){
+                    pairs.add(new Tuple2<>(token, 1L));
+                }
+            }
+            return pairs.iterator();
+        })
+        .groupByKey()
+        .mapValues((it)-> {
+            long sum = 0;
+            for (long c : it)
+                sum += c;
+            return sum;
+        })
+        .sortByKey();
 
-        // new JavaPairRDD to store (key, value) pairs
-        // Each word is mapped into a tuple (word, 1)
-        // Then using reduceByKey we gather together all pairs with same key and increase value
-        JavaPairRDD<String, Integer> dCounts = dWords.mapToPair((w) -> new Tuple2<>(w, 1)).reduceByKey((x, y) -> x + y);
+        List<Tuple2<String, Long>> counts = docs.collect();
 
-        // Swap (key, value) to (value, key) to use sortByKey
-        JavaPairRDD<Integer, String> dSwapped = dCounts.mapToPair((w) -> new Tuple2<>(w._2, w._1));
-        dSwapped = dSwapped.sortByKey(true, 1);
 
-        // Output is word : occurrences
-        dSwapped.foreach( x -> System.out.println(x._2 + " : " + x._1));
+        counts.forEach((tuple) -> {
+            String word = tuple._1();
+            long count = tuple._2();
+            System.out.println(word + " :: " + count);
+        });
+
     }
 }
