@@ -95,7 +95,7 @@ public class G04HM2 {
 
         start = System.currentTimeMillis();
 
-        JavaPairRDD<String,Long> MapImprWC2 = lines.flatMapToPair((document)-> {
+        JavaPairRDD<Long, scala.Tuple2<String,Long>> MapImprWC2 = lines.flatMapToPair((document)-> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<Long, Tuple2<String, Long>>> triplet = new ArrayList<>();
@@ -120,8 +120,18 @@ public class G04HM2 {
                 }
             }
             return triplet.iterator();
-        })
-        // long xKey = (long)(Math.random() * (sqrtN));
+        });
+
+        // JavaPairRDD<String, Long> ReduceImprWC2_1 = MapImprWC2.reduceByKey( -> );
+
+//        .mapValues((it)-> {
+//            long sum = 0;
+//            for (long c : it)
+//                sum += c;
+//            return sum;
+//            })
+//        .sortByKey();
+
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
