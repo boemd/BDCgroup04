@@ -93,11 +93,13 @@ public class G04HM2 {
         long word_occurrences = 3503570;
         long sqrtN = (long)Math.sqrt(word_occurrences);     // We need a key which is a random value in [0,sqrtN)
 
-        JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();
-        lines2.count();
+        JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();  // Ho creato un secondo JavaRDD<String> in quanto mi è venuto il
+        lines2.count();                                         // dubbio che quello sopra potesse essere stato modificato
 
         start = System.currentTimeMillis();
 
+        // Qua è abbastanza simile a come ha fatto Davide per l'Improved Word Count 1 con l'unica differenza che c'è una
+        // chiave diversa, xKey
         JavaPairRDD<Long, java.lang.Iterable<scala.Tuple2<String,Long>>> MapImprWC2_1 = lines2.flatMapToPair((document)-> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
@@ -118,14 +120,20 @@ public class G04HM2 {
                 }
                 //if the token is not found, I add it with value 1
                 if(!done){
-                    long xKey = (long)(Math.random() * (sqrtN));
+                    long xKey = (long)(Math.random() * (sqrtN));        // Numero random da 0 a sqrt(N)
                     triplet.add(new Tuple2<>(xKey,new Tuple2<>(token, 1L)));
                 }
             }
             return triplet.iterator();
-        }).groupByKey();
+        }).groupByKey();    // Questa è la prima parte del Reduce nel Round 1 (slide 22)
+
+        // Qua dovrebbe esserci la seconda parte del Reduce nel Round 1, cioè prende la tupla <xKey, <String, Long>>
+        // e la trasforma in <String, Long> verificando anche che Long sia la somma di totale di String uguali (spiegato di
+        // merda da me, sulle slide è molto molto più chiaro)
 
         //JavaPairRDD<String,Long> MapImprWC2_2 = MapImprWC2_1.flatMapToPair((triplet)-> {})
+
+        // Per la parte finale dovrebbe essere identica o molto simile a quella dell'Impr.W.C.1
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
