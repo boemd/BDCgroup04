@@ -13,6 +13,9 @@ import java.io.*;
 
 public class G04HM2 {
     public static void main(String[] args){
+
+        // ------------------------------ POINT 1 ------------------------------
+
         if (args.length == 0) {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
@@ -25,12 +28,19 @@ public class G04HM2 {
                 .setAppName("Preliminaries");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        //load a text file into an RDD of strings, where each string corresponds to a distinct line of the file
+        // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the
+        // file
         int numPartitions = sc.defaultParallelism();
-        JavaRDD<String> lines = sc.textFile(path, numPartitions);
 
+        // ----------------------- IMPROVED WORD COUNT 1 -----------------------
+
+        JavaRDD<String> lines = sc.textFile(path, numPartitions).cache();   // Added .cache() to force the loading of
+                                                                            // the file before the stopwatch is started
+        lines.count();
+        // Now the RDD has been loaded and cached in memory and we can start measuring time
+        long start = System.currentTimeMillis();
         JavaPairRDD<String,Long> docs = lines.flatMapToPair((document)-> {
-            //I split each document in words and I count the repetitions in the document
+            // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
             for (String token : tokens) {
@@ -62,14 +72,20 @@ public class G04HM2 {
         })
         .sortByKey();
 
-        List<Tuple2<String, Long>> counts = docs.collect();
+        long end = System.currentTimeMillis();
+        System.out.println("Elapsed time of Improved Word Count 1: " + (end - start) + " ms");
 
+        // Output of Improved Word Count 1, not required
 
-        counts.forEach((tuple) -> {
-            String word = tuple._1();
-            long count = tuple._2();
-            System.out.println(word + " :: " + count);
-        });
+//        List<Tuple2<String, Long>> counts = docs.collect();
+//
+//        counts.forEach((tuple) -> {
+//            String word = tuple._1();
+//            long count = tuple._2();
+//            System.out.println(word + " :: " + count);
+//        });
+
+        // ----------------------- IMPROVED WORD COUNT 2 -----------------------
 
     }
 }
