@@ -34,15 +34,15 @@ public class G04HM2 {
 
         // ----------------------- IMPROVED WORD COUNT 1 -----------------------
 
-        JavaRDD<String> lines = sc.textFile(path, numPartitions).cache();   // Added .cache() to force the loading of
-        lines.count();                                                      // the file before the stopwatch is started
+        JavaRDD<String> lines1 = sc.textFile(path, numPartitions).cache();   // Added .cache() to force the loading of
+        lines1.count();                                                      // the file before the stopwatch is started
 
         // Now the RDD has been loaded and cached in memory and we can start measuring time
         long start = System.currentTimeMillis();
 
         // "docs" è una variabile inutilizzata, mettendo dentro commento "JavaPairRDD<String,Long> docs" dovrebbe
         // funzionare tutto comunque
-        JavaPairRDD<String,Long> docs = lines.flatMapToPair((document)-> {
+        JavaPairRDD<String,Long> ImprWC1 = lines1.flatMapToPair((document)-> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
@@ -80,7 +80,7 @@ public class G04HM2 {
 
         // Output of Improved Word Count 1, not required
 
-//        List<Tuple2<String, Long>> counts = docs.collect();
+//        List<Tuple2<String, Long>> counts = ImprWC1.collect();
 //
 //        counts.forEach((tuple) -> {
 //            String word = tuple._1();
@@ -93,9 +93,12 @@ public class G04HM2 {
         long word_occurrences = 3503570;
         long sqrtN = (long)Math.sqrt(word_occurrences);     // We need a key which is a random value in [0,sqrtN)
 
+        JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();
+        lines2.count();
+
         start = System.currentTimeMillis();
 
-        JavaPairRDD<Long, scala.Tuple2<String,Long>> MapImprWC2 = lines.flatMapToPair((document)-> {
+        JavaPairRDD<Long, java.lang.Iterable<scala.Tuple2<String,Long>>> MapImprWC2_1 = lines2.flatMapToPair((document)-> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<Long, Tuple2<String, Long>>> triplet = new ArrayList<>();
@@ -120,18 +123,9 @@ public class G04HM2 {
                 }
             }
             return triplet.iterator();
-        });
+        }).groupByKey();
 
-        // JavaPairRDD<String, Long> ReduceImprWC2_1 = MapImprWC2.reduceByKey( -> );
-
-//        .mapValues((it)-> {
-//            long sum = 0;
-//            for (long c : it)
-//                sum += c;
-//            return sum;
-//            })
-//        .sortByKey();
-
+        //JavaPairRDD<String,Long> MapImprWC2_2 = MapImprWC2_1.flatMapToPair((triplet)-> {})
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
