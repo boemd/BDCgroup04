@@ -149,7 +149,39 @@ public class G04HM2 {
 
         // -------------------- WORD COUNT WITH reduceByKey --------------------
 
+        JavaRDD<String> lines3 = sc.textFile(path, numPartitions).cache();
+        lines3.count();
 
+        start = System.currentTimeMillis();
+
+        JavaPairRDD<String, Long> WC3 = lines3.flatMapToPair((document) -> {
+            // I split each document in words and I count the repetitions in the document
+            String[] tokens = document.split(" ");
+            ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
+            for (String token : tokens) {
+                //I iterate on the list to see if the current token has already been added
+                ListIterator<Tuple2<String, Long>> itr = pairs.listIterator();
+                boolean done = false;
+                while (itr.hasNext()) {
+                    Tuple2<String, Long> elem = itr.next();
+                    //if the token is present, its value gets incremented by 1
+                    if (elem._1().equals(token)) {
+                        itr.set(new Tuple2<>(elem._1(), elem._2() + 1L));
+                        done = true;
+                        break;
+                    }
+                }
+                //if the token is not found, I add it with value 1
+                if (!done) {
+                    pairs.add(new Tuple2<>(token, 1L));
+                }
+            }
+            return pairs.iterator();
+        })
+                .reduceByKey((x,y) -> x+y);
+
+        end = System.currentTimeMillis();
+        System.out.println("Elapsed time of Word Count with reduceByKey(): " + (end - start) + " ms");
 
         /////////////////////////////////////////////POINT 2//////////////////////////////////////////
 
