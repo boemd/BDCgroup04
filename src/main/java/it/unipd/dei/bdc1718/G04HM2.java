@@ -88,9 +88,8 @@ public class G04HM2 {
             System.out.println(word + " :: " + count);
         });
         */
-        // ----------------------- IMPROVED WORD COUNT 2 -----------------------
 
-        // long word_occurrences = 3503570;
+        // ----------------------- IMPROVED WORD COUNT 2 -----------------------
 
         JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();
         // long word_occurrences = 3503570;
@@ -99,9 +98,9 @@ public class G04HM2 {
 
         start = System.currentTimeMillis();
 
-        // Qua è abbastanza simile a come ha fatto Davide per l'Improved Word Count 1 con l'unica differenza che c'è una
-        // chiave diversa, xKey
-        JavaPairRDD<Long, java.lang.Iterable<scala.Tuple2<String, Long>>> MapImprWC2_1 = lines2.flatMapToPair((document) -> {
+        // Da modificare il tipo di ImprWC2 in JavaPairRDD<String, Long>; l'avevo messo così com'è attualmente per fare
+        // in modo che non venisse fuori tutto rosso quello che era all'interno del primo flatMapToPair()
+        JavaPairRDD<Long, java.lang.Iterable<scala.Tuple2<String, Long>>> ImprWC2 = lines2.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<Long, Tuple2<String, Long>>> triplet = new ArrayList<>();
@@ -126,21 +125,30 @@ public class G04HM2 {
                 }
             }
             return triplet.iterator();
-        }).groupByKey();    // Questa è la prima parte del Reduce nel Round 1 (slide 22)
-
-//        java.lang.Iterable<scala.Tuple2<String, Long>> MapImprWC2_2 = MapImprWC2_1.flatMapToPair((triplet) -> {
-//            java.lang.Iterable<scala.Tuple2<String, Long>> newKeyvaluepair = triplet._2();
-//            return newKeyvaluepair;
-//        })
-//        .mapValues((it) -> {
-//            long sum = 0;
-//            for (long c : it)
-//                sum += c;
-//            return sum;
-//        });
+        })
+        .groupByKey()   // Questa è la prima parte del Reduce nel Round 1 (slide 22)
+        /*.flatMapToPair((triplet) -> {
+            ArrayList<Tuple2<String, Long>> pair = new ArrayList<>();
+            // IDEA PER QUESTA PARTE
+            // Si passano tutte le Key-Value pairs di triplet (penso serva un modo per contare il numero di xKey e poi
+            // far partire un for), che in realtà è nella forma < xKey, Iterable<Tuple> >
+            // Con la tupla interna che è nella forma < Word, CountParziale >
+            // Se si trova un doppione di Word si sommano i 2 CountParziale e si va avanti così
+            // Alla fine si ritorna un nuovo RDD senza xKey e nella forma < Word, CountTot >
+        })
+        .groupByKey()               // For each word we gather the, at most, sqrtN pairs (word, count) and we produce
+        .mapValues((it) -> {        // the pair (word, countTot)
+            long sum = 0;
+            for (long c : it)
+                sum += c;
+            return sum;
+            })*/;
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
+
+        // -------------------- WORD COUNT WITH reduceByKey --------------------
+
 
 
         /////////////////////////////////////////////POINT 2//////////////////////////////////////////
