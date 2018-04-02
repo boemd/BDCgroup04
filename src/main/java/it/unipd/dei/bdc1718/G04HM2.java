@@ -16,7 +16,7 @@ import java.io.*;
 public class G04HM2 {
     public static void main(String[] args) {
 
-        // ------------------------------ POINT 1 ------------------------------
+        /////////////////////////////////////////////POINT 1//////////////////////////////////////////
 
         if (args.length == 0) {
             throw new IllegalArgumentException("Expecting the file name on the command line");
@@ -42,8 +42,6 @@ public class G04HM2 {
         // Now the RDD has been loaded and cached in memory and we can start measuring time
         long start = System.currentTimeMillis();
 
-        // "docs" è una variabile inutilizzata, mettendo dentro commento "JavaPairRDD<String,Long> docs" dovrebbe
-        // funzionare tutto comunque
         JavaPairRDD<String, Long> ImprWC1 = lines1.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
@@ -78,7 +76,6 @@ public class G04HM2 {
         //need to sort the elements
         //JavaRDD<Tuple2<String, Long>> wordCounts = docs.toRDD().sortBy((tuple) -> tuple._2(), true, numPartitions);
 
-
         long end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 1: " + (end - start) + " ms");
 
@@ -93,11 +90,11 @@ public class G04HM2 {
         */
         // ----------------------- IMPROVED WORD COUNT 2 -----------------------
 
-        //long word_occurrences = 3503570;
+        // long word_occurrences = 3503570;
 
-
-        JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();  // Ho creato un secondo JavaRDD<String> in quanto mi è venuto il
-        long word_occurrences = lines2.count();                                         // dubbio che quello sopra potesse essere stato modificato
+        JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();
+        // long word_occurrences = 3503570;
+        long word_occurrences = lines2.count();
         long sqrtN = (long) Math.sqrt(word_occurrences);     // We need a key which is a random value in [0,sqrtN)
 
         start = System.currentTimeMillis();
@@ -131,13 +128,16 @@ public class G04HM2 {
             return triplet.iterator();
         }).groupByKey();    // Questa è la prima parte del Reduce nel Round 1 (slide 22)
 
-        // Qua dovrebbe esserci la seconda parte del Reduce nel Round 1, cioè prende la tupla <xKey, <String, Long>>
-        // e la trasforma in <String, Long> verificando anche che Long sia la somma di totale di String uguali (spiegato di
-        // merda da me, sulle slide è molto molto più chiaro)
-
-        //JavaPairRDD<String,Long> MapImprWC2_2 = MapImprWC2_1.flatMapToPair((triplet)-> {})
-
-        // Per la parte finale dovrebbe essere identica o molto simile a quella dell'Impr.W.C.1
+//        java.lang.Iterable<scala.Tuple2<String, Long>> MapImprWC2_2 = MapImprWC2_1.flatMapToPair((triplet) -> {
+//            java.lang.Iterable<scala.Tuple2<String, Long>> newKeyvaluepair = triplet._2();
+//            return newKeyvaluepair;
+//        })
+//        .mapValues((it) -> {
+//            long sum = 0;
+//            for (long c : it)
+//                sum += c;
+//            return sum;
+//        });
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
@@ -155,20 +155,20 @@ public class G04HM2 {
         }
         in.close();
         System.out.println("The " + k + " most frequent words in " + path + " are:");
-        //ImprWC1.mapToPair((pair) -> (pair.swap())).sortByKey(false).mapToPair((pair) -> (pair.swap()));
-        ImprWC1.mapToPair((tuple) -> {
+
+        JavaPairRDD<String, Long> frequentwords = ImprWC1.mapToPair((tuple) -> {
             String word = tuple._1();
             long count = tuple._2();
             return new Tuple2<>(count, word);
         })
-        .sortByKey()
+        .sortByKey(false)                   // .sortbyKey() sort in an ascending order, this one in descending order
         .mapToPair((tuple) -> {
             String word = tuple._2();
             long count = tuple._1();
             return new Tuple2<>(word, count);
         });
 
-        List<Tuple2<String, Long>> counts = ImprWC1.collect();
+        List<Tuple2<String, Long>> counts = frequentwords.collect();
         Iterator<Tuple2<String, Long>> iter = counts.iterator();
         for(int i=0; i<k; i++){
             Tuple2<String, Long> tuple = iter.next();
