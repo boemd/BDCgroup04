@@ -38,7 +38,6 @@ public class G04HM1 {
 
         // Create a parallel collection
         JavaRDD<Double> dNumbers = sc.parallelize(lNumbers);
-
         //  - - - - - - POINT 2 - - - - - -
         // Computing the mean using a reduce (sum all elements and then divide by the cardinality) function
         // If the Map function is an identity function, we omit it
