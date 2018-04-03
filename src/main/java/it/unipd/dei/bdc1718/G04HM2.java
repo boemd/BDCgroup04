@@ -1,5 +1,6 @@
 package it.unipd.dei.bdc1718;
 
+import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 import org.apache.spark.SparkConf;
@@ -100,7 +101,7 @@ public class G04HM2 {
 
         // Da modificare il tipo di ImprWC2 in JavaPairRDD<String, Long>; l'avevo messo così com'è attualmente per fare
         // in modo che non venisse fuori tutto rosso quello che era all'interno del primo flatMapToPair()
-        JavaPairRDD<Long, java.lang.Iterable<scala.Tuple2<String, Long>>> ImprWC2 = lines2.flatMapToPair((document) -> {
+        JavaPairRDD<String,Long> ImprWC2 = lines2.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<Long, Tuple2<String, Long>>> triplet = new ArrayList<>();
@@ -126,7 +127,38 @@ public class G04HM2 {
             }
             return triplet.iterator();
         })
-        .groupByKey()   // Questa è la prima parte del Reduce nel Round 1 (slide 22)
+        .groupByKey()
+        .flatMapToPair((triplet) -> {
+            ArrayList<Tuple2<String,Long>> tbr = new ArrayList<>(); //list to be returned: here I put the words and the number of occurrences
+            Iterator<Tuple2<String, Long>> iter = triplet._2().iterator(); //iterator over the gathered pairs
+            //iteration over the gathered pairs
+            while (iter.hasNext()){
+                Tuple2<String, Long> current = iter.next();
+                ListIterator<Tuple2<String,Long>> iterTBR = tbr.listIterator();// iterator on the list tbr
+                boolean done = false;
+                while(iterTBR.hasNext()){
+                    Tuple2<String,Long> elemTBR = iterTBR.next();
+                    //if the tuples have the same word
+                    if(elemTBR._1().equals(current._1())){
+                        iterTBR.set(new Tuple2<>(elemTBR._1(),elemTBR._2()+current._2()));
+                        done = true;
+                        break;
+                    }
+                }
+                if (!done){
+                    iterTBR.add(new Tuple2<>(current._1(),current._2()));
+                }
+            }
+            return tbr.iterator();
+        }).groupByKey()               // For each word we gather the, at most, sqrtN pairs (word, count) and we produce
+         .mapValues((it) -> {        // the pair (word, countTot)
+             long sum = 0;
+             for (long c : it)
+                 sum += c;
+             return sum;
+             });
+
+                // Questa è la prima parte del Reduce nel Round 1 (slide 22)
         /*.flatMapToPair((triplet) -> {
             ArrayList<Tuple2<String, Long>> pair = new ArrayList<>();
             // IDEA PER QUESTA PARTE
@@ -196,7 +228,7 @@ public class G04HM2 {
         in.close();
         System.out.println("The " + k + " most frequent words in " + path + " are:");
 
-        JavaPairRDD<String, Long> frequentwords = ImprWC1.mapToPair((tuple) -> {
+        JavaPairRDD<String, Long> frequentwords = ImprWC2.mapToPair((tuple) -> {
             String word = tuple._1();
             long count = tuple._2();
             return new Tuple2<>(count, word);
