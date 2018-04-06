@@ -171,8 +171,6 @@ public class G04HM2 {
 
         start = System.currentTimeMillis();
 
-        // Da modificare il tipo di ImprWC2 in JavaPairRDD<String, Long>; l'avevo messo così com'è attualmente per fare
-        // in modo che non venisse fuori tutto rosso quello che era all'interno del primo flatMapToPair()
         JavaPairRDD<String,Long> ImprWCf = linesf.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
