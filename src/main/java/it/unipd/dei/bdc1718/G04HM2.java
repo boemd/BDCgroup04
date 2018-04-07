@@ -1,6 +1,5 @@
 package it.unipd.dei.bdc1718;
 
-import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 import org.apache.spark.SparkConf;
@@ -8,11 +7,8 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
-import scala.Serializable;
-import scala.Tuple2$mcCC$sp;
 
 import java.util.*;
-import java.io.*;
 
 public class G04HM2 {
     public static void main(String[] args) {
@@ -31,19 +27,18 @@ public class G04HM2 {
                 .setAppName("Preliminaries");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the
-        // file
+        // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the file
         int numPartitions = sc.defaultParallelism();
 
         // ----------------------- IMPROVED WORD COUNT 1 -----------------------
 
-        JavaRDD<String> lines1 = sc.textFile(path, numPartitions).cache();   // Added .cache() to force the loading of
-        lines1.count();                                                      // the file before the stopwatch is started
+        JavaRDD<String> lines = sc.textFile(path, numPartitions).cache();   // Added .cache() to force the loading of
+        lines.count();                                                      // the file before the stopwatch is started
 
         // Now the RDD has been loaded and cached in memory and we can start measuring time
         long start = System.currentTimeMillis();
 
-        JavaPairRDD<String, Long> ImprWC1 = lines1.flatMapToPair((document) -> {
+        JavaPairRDD<String, Long> ImprWC1 = lines.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
@@ -55,6 +50,7 @@ public class G04HM2 {
                     Tuple2<String, Long> elem = itr.next();
                     //if the token is present, its value gets incremented by 1
                     if (elem._1().equals(token)) {
+                        //I use the method set because I need to substitute the old Tuple
                         itr.set(new Tuple2<>(elem._1(), elem._2() + 1L));
                         done = true;
                         break;
@@ -67,13 +63,13 @@ public class G04HM2 {
             }
             return pairs.iterator();
         })
-                .groupByKey()
-                .mapValues((it) -> {
-                    long sum = 0;
-                    for (long c : it)
-                        sum += c;
-                    return sum;
-                });
+        .groupByKey()
+        .mapValues((it) -> {
+            long sum = 0;
+            for (long c : it)
+                sum += c;
+                return sum;
+            });
         //need to sort the elements
         //JavaRDD<Tuple2<String, Long>> wordCounts = docs.toRDD().sortBy((tuple) -> tuple._2(), true, numPartitions);
 
@@ -93,14 +89,11 @@ public class G04HM2 {
         // ----------------------- IMPROVED WORD COUNT 2 -----------------------
 
         JavaRDD<String> lines2 = sc.textFile(path, numPartitions).cache();
-        // long word_occurrences = 3503570;
         long word_occurrences = lines2.count();
         long sqrtN = (long) Math.sqrt(word_occurrences);     // We need a key which is a random value in [0,sqrtN)
 
         start = System.currentTimeMillis();
 
-        // Da modificare il tipo di ImprWC2 in JavaPairRDD<String, Long>; l'avevo messo così com'è attualmente per fare
-        // in modo che non venisse fuori tutto rosso quello che era all'interno del primo flatMapToPair()
         JavaPairRDD<String,Long> ImprWC2 = lines2.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
@@ -113,8 +106,8 @@ public class G04HM2 {
                     Tuple2<Long, Tuple2<String, Long>> elem = itr.next();
                     //if the token is present, its value gets incremented by 1
                     if (elem._2._1().equals(token)) {
-                        Tuple2<String, Long> supp = new Tuple2<>(elem._2._1(), elem._2._2() + 1L);
-                        itr.set(new Tuple2<>(elem._1(), new Tuple2<>(supp._1(), supp._2())));
+                        // I add a tuple of the type [key_of_the_pair, (word, incremented_value)]
+                        itr.set(new Tuple2<>(elem._1(), new Tuple2<>(elem._2._1(), elem._2._2() + 1L)));
                         done = true;
                         break;
                     }
@@ -130,10 +123,11 @@ public class G04HM2 {
         .groupByKey()
         .flatMapToPair((triplet) -> {
             ArrayList<Tuple2<String,Long>> tbr = new ArrayList<>(); //list to be returned: here I put the words and the number of occurrences
-            Iterator<Tuple2<String, Long>> iter = triplet._2().iterator(); //iterator over the gathered pairs
+            //Iterator<Tuple2<String, Long>> triplets_iterator = triplet._2().iterator(); //iterator over the gathered pairs
             //iteration over the gathered pairs
-            while (iter.hasNext()){
-                Tuple2<String, Long> current = iter.next();
+            //while (triplets_iterator.hasNext()){
+            //    Tuple2<String, Long> current = triplets_iterator.next();
+            for(Tuple2<String, Long> current : triplet._2){
                 ListIterator<Tuple2<String,Long>> iterTBR = tbr.listIterator();// iterator on the list tbr
                 boolean done = false;
                 while(iterTBR.hasNext()){
@@ -150,7 +144,7 @@ public class G04HM2 {
                 }
             }
             return tbr.iterator();
-        }).groupByKey()               // For each word we gather the, at most, sqrtN pairs (word, count) and we produce
+        }).groupByKey()              // For each word we gather the, at most, sqrtN pairs (word, count) and we produce
          .mapValues((it) -> {        // the pair (word, countTot)
              long sum = 0;
              for (long c : it)
@@ -161,65 +155,14 @@ public class G04HM2 {
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
 
-        // ----------------------- FORBIDDEN WORD COUNT ----------------------------
-        // ----------------------- IMPROVED WORD COUNT 2 -----------------------
-
-        JavaRDD<String> linesf = sc.textFile(path, numPartitions).cache();
-        // long word_occurrences = 3503570;
-        long word_occurrencesf = linesf.count();
-        long sqrtNf = (long) Math.sqrt(word_occurrences);     // We need a key which is a random value in [0,sqrtN)
-
-        start = System.currentTimeMillis();
-
-        JavaPairRDD<String,Long> ImprWCf = linesf.flatMapToPair((document) -> {
-            // I split each document in words and I count the repetitions in the document
-            String[] tokens = document.split(" ");
-            ArrayList<Tuple2<Tuple2<Long,String>, Long>> triplet = new ArrayList<>();
-            for (String token : tokens) {
-                //I iterate on the list to see if the current token has already been added
-                ListIterator<Tuple2<Tuple2<Long,String>, Long>> itr = triplet.listIterator();
-                boolean done = false;
-                while (itr.hasNext()) {
-                    Tuple2<Tuple2<Long,String>, Long> elem = itr.next();
-                    //if the token is present, its value gets incremented by 1
-                    if (elem._1._2().equals(token)) {
-                        itr.set(new Tuple2<>(new Tuple2<>(elem._1()._1(),elem._1()._2()), elem._2()+1L)); //sorry guys for the language of gods
-                        done = true;
-                        break;
-                    }
-                }
-                //if the token is not found, I add it with value 1
-                if (!done) {
-                    long xKey = (long) (Math.random() * (sqrtN));        // Numero random da 0 a sqrt(N)
-                    triplet.add(new Tuple2<>(new Tuple2<>(xKey,token), 1L));
-                }
-            }
-            return triplet.iterator();
-        })
-                .groupByKey()
-                .flatMapToPair((triplet) -> {
-                    ArrayList<Tuple2<String,Long>> tbr = new ArrayList<>(); //list to be returned: here I put the words and the number of occurrences
-                    Iterator<Long> iter = triplet._2().iterator(); //iterator over the gathered pairs
-                    long sum=0;
-                    while(iter.hasNext())
-                        sum+=iter.next();
-                    tbr.add(new Tuple2<>(triplet._1()._2(),sum));
-                    return tbr.iterator();
-
-                })
-                .reduceByKey((x,y) -> x+y);;
-
-        end = System.currentTimeMillis();
-        System.out.println("Elapsed time of the Improved Improved Word Count 2: " + (end - start) + " ms");
-
-        // -------------------- WORD COUNT WITH reduceByKey --------------------
+        // -------------------- IMPROVED WORD COUNT WITH reduceByKey() --------------------
 
         JavaRDD<String> lines3 = sc.textFile(path, numPartitions).cache();
         lines3.count();
 
         start = System.currentTimeMillis();
 
-        JavaPairRDD<String, Long> WC3 = lines3.flatMapToPair((document) -> {
+        JavaPairRDD<String, Long> ImprWC3 = lines3.flatMapToPair((document) -> {
             // I split each document in words and I count the repetitions in the document
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
@@ -243,10 +186,60 @@ public class G04HM2 {
             }
             return pairs.iterator();
         })
-                .reduceByKey((x,y) -> x+y);
+        .reduceByKey((x,y) -> x+y);
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Word Count with reduceByKey(): " + (end - start) + " ms");
+
+
+        // ----------------------- IMPROVED IMPROVED WORD COUNT 2 -----------------------
+        //As the title says, this is an improvement of Improved Word Count 2.
+        //In the first round, instead of grouping data as (x,(w, Ci(w)))
+        //data is grouped as ((x,w), Ci(w)) and then reduceByKey() is called twice
+        //This implementation is one round longer than the one seen in class (and implemented in IMPROVED WORD COUNT 2)
+        //since it's necessary to get rid of the random value x (map phase) and then perform the final count (reduce phase),
+        //but the execution time is quite lower.
+
+        JavaRDD<String> linesf = sc.textFile(path, numPartitions).cache();
+        long word_occurrencesf = linesf.count();
+        long sqrtNf = (long) Math.sqrt(word_occurrencesf);     // We need a key which is a random value in [0,sqrtN)
+
+        start = System.currentTimeMillis();
+
+        JavaPairRDD<String,Long> ImprWCf = linesf.flatMapToPair((document) -> {
+            // I split each document in words and I count the repetitions in the document
+            String[] tokens = document.split(" ");
+            ArrayList<Tuple2<Tuple2<Long,String>, Long>> triplet = new ArrayList<>();
+            for (String token : tokens) {
+                //I iterate on the list to see if the current token has already been added
+                ListIterator<Tuple2<Tuple2<Long,String>, Long>> triplets_iterator = triplet.listIterator();
+                boolean done = false;
+                while (triplets_iterator.hasNext()) {
+                    Tuple2<Tuple2<Long,String>, Long> elem = triplets_iterator.next();
+                    //if the token is present, its value gets incremented by 1
+                    if (elem._1._2().equals(token)) {
+                        triplets_iterator.set(new Tuple2<>(new Tuple2<>(elem._1()._1(),elem._1()._2()), elem._2()+1L)); //sorry guys for the language of gods
+                        done = true;
+                        break;
+                    }
+                }
+                //if the token is not found, I add it with value 1
+                if (!done) {
+                    long xKey = (long) (Math.random() * (sqrtNf));        // Numero random da 0 a sqrt(N)
+                    triplet.add(new Tuple2<>(new Tuple2<>(xKey,token), 1L));
+                }
+            }
+            return triplet.iterator();
+        })
+        .reduceByKey((x,y) -> x+y)
+        .mapToPair((triplet) -> new Tuple2<>(triplet._1()._2(), triplet._2()))
+        .reduceByKey((x,y) -> x+y);
+
+        end = System.currentTimeMillis();
+        System.out.println("Elapsed time of the Improved Improved Word Count 2: " + (end - start) + " ms");
+
+
+
 
         /////////////////////////////////////////////POINT 2//////////////////////////////////////////
 
