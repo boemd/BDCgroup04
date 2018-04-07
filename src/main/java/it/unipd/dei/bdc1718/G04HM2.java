@@ -254,8 +254,9 @@ public class G04HM2 {
         in.close();
         System.out.println("The " + k + " most frequent words in " + path + " are:");
 
-        JavaPairRDD<Long, String> frequentwords = ImprWCf.mapToPair((tuple) -> new Tuple2<>(tuple._2, tuple._1))
-        .sortByKey(false);                   // .sortbyKey() sort in an ascending order, this one in descending order
+        JavaPairRDD<Long, String> frequentwords = ImprWCf
+        .mapToPair((tuple) -> new Tuple2<>(tuple._2, tuple._1))
+        .sortByKey(false);                                          // .sortbyKey() sort in an ascending order, this one in descending order
 
         List<Tuple2<Long, String>> counts = frequentwords.collect();
         Iterator<Tuple2<Long, String>> iter = counts.iterator();
