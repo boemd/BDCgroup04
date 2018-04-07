@@ -207,7 +207,7 @@ public class G04HM2 {
                     return tbr.iterator();
 
                 })
-                .reduceByKey((x,y) -> x+y);;
+                .reduceByKey((x,y) -> x+y);
 
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of the Improved Improved Word Count 2: " + (end - start) + " ms");
@@ -250,35 +250,26 @@ public class G04HM2 {
 
         /////////////////////////////////////////////POINT 2//////////////////////////////////////////
 
-        System.out.println("Please type the number of most frequent words you want to see.");
+        System.out.println("Please type the number of most frequent words you want to see:");
         Scanner in = new Scanner(System.in);
         int k;
         k=in.nextInt();
         while(k<1){
-            System.out.println("Please insert a positive value.");
+            System.out.println("Please insert a positive value:");
             k=in.nextInt();
         }
         in.close();
         System.out.println("The " + k + " most frequent words in " + path + " are:");
 
-        JavaPairRDD<String, Long> frequentwords = ImprWCf.mapToPair((tuple) -> {
-            String word = tuple._1();
-            long count = tuple._2();
-            return new Tuple2<>(count, word);
-        })
-        .sortByKey(false)                   // .sortbyKey() sort in an ascending order, this one in descending order
-        .mapToPair((tuple) -> {
+        JavaPairRDD<Long, String> frequentwords = ImprWCf.mapToPair((tuple) -> new Tuple2<>(tuple._2, tuple._1))
+        .sortByKey(false);                   // .sortbyKey() sort in an ascending order, this one in descending order
+
+        List<Tuple2<Long, String>> counts = frequentwords.collect();
+        Iterator<Tuple2<Long, String>> iter = counts.iterator();
+        for(int i=0; i<k; i++){
+            Tuple2<Long, String> tuple = iter.next();
             String word = tuple._2();
             long count = tuple._1();
-            return new Tuple2<>(word, count);
-        });
-
-        List<Tuple2<String, Long>> counts = frequentwords.collect();
-        Iterator<Tuple2<String, Long>> iter = counts.iterator();
-        for(int i=0; i<k; i++){
-            Tuple2<String, Long> tuple = iter.next();
-            String word = tuple._1();
-            long count = tuple._2();
             System.out.println(word + " :: " + count);
         }
 
