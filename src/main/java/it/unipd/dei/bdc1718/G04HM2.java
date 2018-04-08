@@ -43,12 +43,12 @@ public class G04HM2 {
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
             for (String token : tokens) {
-                //I iterate on the list to see if the current token has already been added
+                // I iterate on the list to see if the current token has already been added
                 ListIterator<Tuple2<String, Long>> itr = pairs.listIterator();
                 boolean done = false;
                 while (itr.hasNext()) {
                     Tuple2<String, Long> elem = itr.next();
-                    //if the token is present, its value gets incremented by 1
+                    // If the token is present, its value gets incremented by 1
                     if (elem._1().equals(token)) {
                         //I use the method set because I need to substitute the old Tuple
                         itr.set(new Tuple2<>(elem._1(), elem._2() + 1L));
@@ -56,7 +56,7 @@ public class G04HM2 {
                         break;
                     }
                 }
-                //if the token is not found, I add it with value 1
+                // If the token is not found, I add it with value 1
                 if (!done) {
                     pairs.add(new Tuple2<>(token, 1L));
                 }
@@ -70,7 +70,7 @@ public class G04HM2 {
                 sum += c;
                 return sum;
             });
-        //need to sort the elements
+        // Need to sort the elements
         //JavaRDD<Tuple2<String, Long>> wordCounts = docs.toRDD().sortBy((tuple) -> tuple._2(), true, numPartitions);
 
         long end = System.currentTimeMillis();
@@ -99,12 +99,12 @@ public class G04HM2 {
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<Long, Tuple2<String, Long>>> triplet = new ArrayList<>();
             for (String token : tokens) {
-                //I iterate on the list to see if the current token has already been added
+                // I iterate on the list to see if the current token has already been added
                 ListIterator<Tuple2<Long, Tuple2<String, Long>>> itr = triplet.listIterator();
                 boolean done = false;
                 while (itr.hasNext()) {
                     Tuple2<Long, Tuple2<String, Long>> elem = itr.next();
-                    //if the token is present, its value gets incremented by 1
+                    // If the token is present, its value gets incremented by 1
                     if (elem._2._1().equals(token)) {
                         // I add a tuple of the type [key_of_the_pair, (word, incremented_value)]
                         itr.set(new Tuple2<>(elem._1(), new Tuple2<>(elem._2._1(), elem._2._2() + 1L)));
@@ -112,7 +112,7 @@ public class G04HM2 {
                         break;
                     }
                 }
-                //if the token is not found, I add it with value 1
+                // If the token is not found, I add it with value 1
                 if (!done) {
                     long xKey = (long) (Math.random() * (sqrtN));        // Numero random da 0 a sqrt(N)
                     triplet.add(new Tuple2<>(xKey, new Tuple2<>(token, 1L)));
@@ -167,19 +167,19 @@ public class G04HM2 {
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<String, Long>> pairs = new ArrayList<>();
             for (String token : tokens) {
-                //I iterate on the list to see if the current token has already been added
+                // I iterate on the list to see if the current token has already been added
                 ListIterator<Tuple2<String, Long>> itr = pairs.listIterator();
                 boolean done = false;
                 while (itr.hasNext()) {
                     Tuple2<String, Long> elem = itr.next();
-                    //if the token is present, its value gets incremented by 1
+                    // If the token is present, its value gets incremented by 1
                     if (elem._1().equals(token)) {
                         itr.set(new Tuple2<>(elem._1(), elem._2() + 1L));
                         done = true;
                         break;
                     }
                 }
-                //if the token is not found, I add it with value 1
+                // If the token is not found, I add it with value 1
                 if (!done) {
                     pairs.add(new Tuple2<>(token, 1L));
                 }
@@ -193,12 +193,12 @@ public class G04HM2 {
 
 
         // ----------------------- IMPROVED IMPROVED WORD COUNT 2 -----------------------
-        //As the title says, this is an improvement of Improved Word Count 2.
-        //In the first round, instead of grouping data as (x,(w, Ci(w)))
-        //data is grouped as ((x,w), Ci(w)) and then reduceByKey() is called twice
-        //This implementation is one round longer than the one seen in class (and implemented in IMPROVED WORD COUNT 2)
-        //since it's necessary to get rid of the random value x (map phase) and then perform the final count (reduce phase),
-        //but the execution time is quite lower.
+        // As the title says, this is an improvement of Improved Word Count 2.
+        // In the first round, instead of grouping data as (x,(w, Ci(w)))
+        // data is grouped as ((x,w), Ci(w)) and then reduceByKey() is called twice
+        // This implementation is one round longer than the one seen in class (and implemented in IMPROVED WORD COUNT 2)
+        // since it's necessary to get rid of the random value x (map phase) and then perform the final count (reduce phase),
+        // but the execution time is quite lower.
 
         JavaRDD<String> linesf = sc.textFile(path, numPartitions).cache();
         long word_occurrencesf = linesf.count();
@@ -211,19 +211,19 @@ public class G04HM2 {
             String[] tokens = document.split(" ");
             ArrayList<Tuple2<Tuple2<Long,String>, Long>> triplet = new ArrayList<>();
             for (String token : tokens) {
-                //I iterate on the list to see if the current token has already been added
+                // I iterate on the list to see if the current token has already been added
                 ListIterator<Tuple2<Tuple2<Long,String>, Long>> triplets_iterator = triplet.listIterator();
                 boolean done = false;
                 while (triplets_iterator.hasNext()) {
                     Tuple2<Tuple2<Long,String>, Long> elem = triplets_iterator.next();
-                    //if the token is present, its value gets incremented by 1
+                    // If the token is present, its value gets incremented by 1
                     if (elem._1._2().equals(token)) {
                         triplets_iterator.set(new Tuple2<>(new Tuple2<>(elem._1()._1(),elem._1()._2()), elem._2()+1L)); //sorry guys for the language of gods
                         done = true;
                         break;
                     }
                 }
-                //if the token is not found, I add it with value 1
+                // If the token is not found, I add it with value 1
                 if (!done) {
                     long xKey = (long) (Math.random() * (sqrtNf));        // Numero random da 0 a sqrt(N)
                     triplet.add(new Tuple2<>(new Tuple2<>(xKey,token), 1L));
