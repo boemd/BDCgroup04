@@ -70,8 +70,7 @@ public class G04HM2 {
                 sum += c;
                 return sum;
             });
-        //need to sort the elements
-        //JavaRDD<Tuple2<String, Long>> wordCounts = docs.toRDD().sortBy((tuple) -> tuple._2(), true, numPartitions);
+        ImprWC1.count();
 
         long end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 1: " + (end - start) + " ms");
@@ -152,8 +151,10 @@ public class G04HM2 {
              return sum;
              });
 
+        ImprWC2.count();
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Improved Word Count 2: " + (end - start) + " ms");
+
 
         // -------------------- IMPROVED WORD COUNT WITH reduceByKey() --------------------
 
@@ -187,7 +188,7 @@ public class G04HM2 {
             return pairs.iterator();
         })
         .reduceByKey((x,y) -> x+y);
-
+        ImprWC3.count();
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of Word Count with reduceByKey(): " + (end - start) + " ms");
 
@@ -234,11 +235,9 @@ public class G04HM2 {
         .reduceByKey((x,y) -> x+y)
         .mapToPair((triplet) -> new Tuple2<>(triplet._1()._2(), triplet._2()))
         .reduceByKey((x,y) -> x+y);
-
+        ImprWCf.count();
         end = System.currentTimeMillis();
         System.out.println("Elapsed time of the Improved Improved Word Count 2: " + (end - start) + " ms");
-
-
 
 
         /////////////////////////////////////////////POINT 2//////////////////////////////////////////
@@ -256,7 +255,7 @@ public class G04HM2 {
 
         JavaPairRDD<Long, String> frequentwords = ImprWCf
         .mapToPair((tuple) -> new Tuple2<>(tuple._2, tuple._1))
-        .sortByKey(false);                                          // .sortbyKey() sort in an ascending order, this one in descending order
+        .sortByKey(false);                                          // sortByKey() performs sorting in an ascending order, this one in descending order
 
         List<Tuple2<Long, String>> counts = frequentwords.collect();
         Iterator<Tuple2<Long, String>> iter = counts.iterator();
@@ -266,6 +265,5 @@ public class G04HM2 {
             long count = tuple._1();
             System.out.println(word + " :: " + count);
         }
-
     }
 }
