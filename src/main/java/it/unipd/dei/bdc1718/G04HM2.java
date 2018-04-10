@@ -115,7 +115,7 @@ public class G04HM2 {
                 }
                 // If the token is not found, I add it with value 1
                 if (!done) {
-                    long xKey = (long) (Math.random() * (sqrtN));        // Numero random da 0 a sqrt(N)
+                    long xKey = (long) (Math.random() * (sqrtN));        // Random value in [0,sqrtN)
                     triplet.add(new Tuple2<>(xKey, new Tuple2<>(token, 1L)));
                 }
             }
@@ -221,14 +221,14 @@ public class G04HM2 {
                     Tuple2<Tuple2<Long,String>, Long> elem = triplets_iterator.next();
                     // If the token is present, its value gets incremented by 1
                     if (elem._1._2().equals(token)) {
-                        triplets_iterator.set(new Tuple2<>(new Tuple2<>(elem._1()._1(),elem._1()._2()), elem._2()+1L)); //sorry guys for the language of gods
+                        triplets_iterator.set(new Tuple2<>(new Tuple2<>(elem._1()._1(),elem._1()._2()), elem._2()+1L));
                         done = true;
                         break;
                     }
                 }
                 // If the token is not found, I add it with value 1
                 if (!done) {
-                    long xKey = (long) (Math.random() * (sqrtNf));        // Numero random da 0 a sqrt(N)
+                    long xKey = (long) (Math.random() * (sqrtNf));        // Random value in [0,sqrtN)
                     triplet.add(new Tuple2<>(new Tuple2<>(xKey,token), 1L));
                 }
             }
