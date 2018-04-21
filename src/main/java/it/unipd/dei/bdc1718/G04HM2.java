@@ -197,9 +197,9 @@ public class G04HM2 {
 
         // ----------------------- IMPROVED IMPROVED WORD COUNT 2 -----------------------
         // As the title says, this is an improvement of Improved Word Count 2.
-        // In the first round, instead of grouping data as (x,(w, Ci(w)))
-        // data is grouped as ((x,w), Ci(w)) and then reduceByKey() is called twice
-        // This implementation is one round longer than the one seen in class (and implemented in IMPROVED WORD COUNT 2)
+        // In the first round, instead of grouping data as (x,(w, Ci(w))),
+        // data is grouped as ((x,w), Ci(w)) and then reduceByKey() is called twice.
+        // This implementation is one round longer than the one seen in class (and implemented in IMPROVED WORD COUNT 2),
         // since it's necessary to get rid of the random value x (map phase) and then perform the final count (reduce phase),
         // but the execution time is quite lower.
 
