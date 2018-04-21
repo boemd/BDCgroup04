@@ -28,11 +28,10 @@ public class G04HW3 {
                 .setAppName("Preliminaries");
         JavaSparkContext sc = new JavaSparkContext(conf);
         ArrayList<Vector> a = InputOutput.readVectorsSeq(path);
-        double l = Vectors.sqdist(a.get(0),a.get(1));
-        System.out.println(l);
+        printClustering(kcenter(a, 3));
     }
 
-    public ArrayList<ArrayList<Vector>> kcenter(ArrayList<Vector> P, int k){
+    public static ArrayList<ArrayList<Vector>> kcenter(ArrayList<Vector> P, int k){
         if (k == 0) {
             return null;
         }
@@ -64,7 +63,7 @@ public class G04HW3 {
         return C;
     }
 
-    public ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S){
+    public static ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S){
         //int this version, the intersection of P and S is empty
         ArrayList<ArrayList<Vector>> C = new ArrayList<>();
         ListIterator<ArrayList<Vector>> iterC = C.listIterator();
@@ -86,7 +85,7 @@ public class G04HW3 {
         return C;
     }
 
-    public double[] distance(Vector c, ArrayList<Vector> S){
+    public static double[] distance(Vector c, ArrayList<Vector> S){
         double min = Double.MAX_VALUE;
         double current;
         int currIndex, minIndex = -1;
@@ -103,7 +102,7 @@ public class G04HW3 {
         return out;
     }
 
-    public int argMin(Vector p, ArrayList<Vector> S){
+    public static int argMin(Vector p, ArrayList<Vector> S){
         int minIdx =-1;
         double minDistance = Double.MAX_VALUE;
         ListIterator<Vector> iterS = S.listIterator();
@@ -113,5 +112,24 @@ public class G04HW3 {
             }
         }
         return minIdx;
+    }
+
+    static void printClustering(ArrayList<ArrayList<Vector>> C){
+        ListIterator<ArrayList<Vector>> iterC = C.listIterator();
+        System.out.println("Centers");
+        for (int i=0; iterC.hasNext(); i++){
+            System.out.println("");
+            System.out.println("");
+            System.out.println("");
+            System.out.println("Cluster "+i+":");
+            printArrayList(iterC.next());
+        }
+    }
+
+    static void printArrayList(ArrayList<Vector> P){
+        ListIterator<Vector> iterP = P.listIterator();
+        while(iterP.hasNext()){
+            System.out.println(Arrays.toString(iterP.next().toArray()));
+        }
     }
 }
