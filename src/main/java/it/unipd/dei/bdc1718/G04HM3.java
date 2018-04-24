@@ -1,4 +1,4 @@
-/*package it.unipd.dei.bdc1718;
+package it.unipd.dei.bdc1718;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
@@ -14,7 +14,7 @@ import it.unipd.dei.bdc1718.InputOutput;
 import java.io.IOException;
 import java.util.*;
 
-public class G04HW3 {
+public class G04HM3 {
     public static void main(String[] args) throws IOException {
         if (args.length == 0) {
             throw new IllegalArgumentException("Expecting the file name on the command line");
@@ -174,5 +174,5 @@ public class G04HW3 {
         }
         return S;
     }
+
 }
-*/
