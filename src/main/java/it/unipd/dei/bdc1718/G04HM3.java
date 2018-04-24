@@ -20,6 +20,7 @@ public class G04HM3 {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
         String path = args[0];
+        System.out.println("GO: Preparation");
 
         // Setup Spark
         Logger.getLogger("org").setLevel(Level.OFF);
@@ -27,65 +28,115 @@ public class G04HM3 {
         SparkConf conf = new SparkConf(true)
                 .setAppName("Preliminaries");
         JavaSparkContext sc = new JavaSparkContext(conf);
-        ArrayList<Vector> a = InputOutput.readVectorsSeq(path);
-        printClustering(kcenter(a, 3));
+        ArrayList<Vector> A = InputOutput.readVectorsSeq(path);
+        printArrayList(A);
+
+        System.out.println("OK: Preparation");
+        System.out.println("GO: K-center");
+        ArrayList<Vector> S = kcenter(A,3);
+        System.out.println("OK: K-center");
+        System.out.println("GO: Partition");
+        ArrayList<ArrayList<Vector>> C = Partition(A, S);
+        System.out.println("OK: Partition");
+        System.out.println("GO: Print clustering");
+        printClustering(C);
+        System.out.println("OK: Print clustering");
     }
 
-    public static ArrayList<ArrayList<Vector>> kcenter(ArrayList<Vector> P, int k) {
+    public static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
         if (k <= 0) {
             return null;
         }
 
+        //ArrayList in which to put the centers
         ArrayList<Vector> S = new ArrayList<>();
+
         //choose a random point on P, remove it and put it in S
         int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
         S.add(P.get(n));
         P.remove(n);
-        Vector current;
-        double[] a, best, bestInit = {Double.MIN_VALUE, -1.0};
+        System.out.println("    OK: random choice");
 
-        for (int i = 0; i < k - 1; i++) {
-            best = bestInit;
-            ListIterator<Vector> iterP = P.listIterator();
-            while (iterP.hasNext()) {
-                current = iterP.next();
-                a = distance(current, S);
-                if (a[0] > best[0]) {
-                    best = a;
+
+        //ArrayList in which to put all distances between P\S and S
+        ArrayList<Double> minDistPS = new ArrayList<>();
+        ListIterator<Vector> iterP = P.listIterator();
+        //Initialization of the List. It will be updated with complexity O(|P|) in the for loop
+        for(int i=0; i<P.size(); i++){
+            minDistPS.add(Double.MAX_VALUE);
+        }
+        System.out.println("    OK: distances initialization");
+
+
+        System.out.println("    GO: for-loop");
+        for (int i = 0; i < k-1; i++) {
+
+            //at the beginning of each iteration, the iterator points at the beginning of the ArrayList P
+            iterP = P.listIterator();
+
+            //iterator on minDistPS
+            ListIterator<Double> iterDist =minDistPS.listIterator();
+
+            //Update minDistPS
+            Vector s = S.get(i); //the last vector added to S
+            for(int l=0; iterP.hasNext(); l++){                         //for each element of P
+                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the l-th element of P and the last element of S
+                if (tmp<iterDist.next()){                                   //if the new distance is lower than the old distance
+                    minDistPS.remove(l);                                        //the old distance gets removed
+                    minDistPS.add(l, tmp);                                      //the new distance replaces the old distance
                 }
             }
-            S.add(P.get((int) best[1]));
-            P.remove((int) best[1]);
+            System.out.println("        OK: update distance");
+
+            //find the index of the point of P\S with higher distance from S
+            int maxIndex = minDistPS.indexOf(Collections.max(minDistPS));
+            System.out.println("        OK: maxIndex");
+
+            //add the point to S
+            S.add(P.get(maxIndex));
+            //remove it form P (whose true identity is P\S)
+            P.remove(maxIndex);
+            //remove a node also from minDistPS
+            minDistPS.remove(maxIndex);
+            System.out.println("        OK: addition and removals");
         }
 
-        //ArrayList<ArrayList<Vector>> C = Partition(P, S);
-
-        //return C;
-        return Partition(P, S);        // Perchè non così? - Nick
+        return S;
     }
 
     public static ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S) {
-        //int this version, the intersection of P and S is empty
+        System.out.println("GO: Partition");
+        // I need P\S
+        P.removeAll(S);
+        System.out.println("    OK: removeall");
+
+        //ArrayList in which I put the clusters
         ArrayList<ArrayList<Vector>> C = new ArrayList<>();
         ListIterator<ArrayList<Vector>> iterC = C.listIterator();
-        //the first Vector of the list is the vector of centers
-        C.add(S);
+
+        //add each center to a list
         ListIterator<Vector> iterS = S.listIterator();
         while (iterS.hasNext()) {
             iterC.next().add(iterS.next());
         }
+        System.out.println("    OK: initialization");
+
         ListIterator<Vector> iterP = P.listIterator();
         Vector p;
         int index;
-        while (iterP.hasNext()) {                        // Da riguardare pensando al commento 5 righe sopra, scritto così
-            p = iterP.next();                             // mi sembra che scansioni tutto P, contando anche S - Nick
-            index = argMin(p, S);
-            C.get(index + 1).add(p);
+        while (iterP.hasNext()) {       //for each p in P\S:
+            p = iterP.next();
+            index = argMin(p, S);           //compute the index of the list whose distance from p is minimum
+            C.get(index).add(p);            //add p in that list
         }
+        System.out.println("    OK: while-loop");
+
 
         return C;
     }
 
+    //DO WE REALLY NEED IT?
+    /*
     public static double[] distance(Vector c, ArrayList<Vector> S) {
         double min = Double.MAX_VALUE;
         double current;
@@ -102,6 +153,7 @@ public class G04HM3 {
         double[] out = {min, minIndex};
         return out;
     }
+    */
 
     public static int argMin(Vector p, ArrayList<Vector> S) {
         int minIdx = -1;
@@ -115,9 +167,9 @@ public class G04HM3 {
         return minIdx;
     }
 
+    //it works, tested in other program
     static void printClustering(ArrayList<ArrayList<Vector>> C) {
         ListIterator<ArrayList<Vector>> iterC = C.listIterator();
-        System.out.println("Centers");
         for (int i = 0; iterC.hasNext(); i++) {
             System.out.println("");
             System.out.println("");
@@ -127,6 +179,7 @@ public class G04HM3 {
         }
     }
 
+    //it also works
     static void printArrayList(ArrayList<Vector> P) {
         ListIterator<Vector> iterP = P.listIterator();
         while (iterP.hasNext()) {
