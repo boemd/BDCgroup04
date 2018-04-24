@@ -228,4 +228,16 @@ public class G04HM3 {
         return S;
     }
 
+    public static ArrayList<Double> kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
+        ArrayList<Double> distances = new ArrayList<>();
+        ListIterator<Vector> iterP = P.listIterator();
+        while (iterP.hasNext()){
+            int indexP = iterP.nextIndex();
+            int indexC = argMin(iterP.next(), C);
+            double d = Vectors.sqdist(P.get(indexP),C.get(indexC));
+            distances.add(d);
+        }
+        return distances;
+    }
+
 }
