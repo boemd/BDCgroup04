@@ -33,6 +33,13 @@ public class G04HM3 {
         System.out.println(S.size());
         printArrayList(S);
 
+        ArrayList<Long> WP = new ArrayList<>();
+        for (int i=0; i<A.size(); i++){
+            WP.add(1L);
+        }
+        ArrayList<Vector> Spp = kmeansPP(A, WP, 3);
+        System.out.println("cazzinegri");
+        printArrayList(Spp);
     }
 
     public static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
@@ -46,13 +53,13 @@ public class G04HM3 {
         //choose a random point on P, remove it and put it in S
         int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
         S.add(P.get(n));
-        P.remove(n);
+        P.remove(n);        // Set P - S
 
 
         //ArrayList in which to put all distances between P\S and S
         ArrayList<Double> minDistPS = new ArrayList<>();
         //Initialization of the List. It will be updated with complexity O(|P|) in the for loop
-        for(int i=0; i<P.size(); i++){
+        for(int i = 0; i < P.size(); i++){
             minDistPS.add(Double.MAX_VALUE);
         }
 
@@ -63,13 +70,13 @@ public class G04HM3 {
             ListIterator<Vector> iterP = P.listIterator();
 
             //iterator on minDistPS
-            ListIterator<Double> iterDist =minDistPS.listIterator();
+            ListIterator<Double> iterDist = minDistPS.listIterator();
 
             //Update minDistPS
             Vector s = S.get(0); //the last vector added to S
-            for(int l=0; iterP.hasNext(); l++){                         //for each element of P
+            for(int l = 0; iterP.hasNext(); l++){                         //for each element of P
                 double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the l-th element of P and the last element of S
-                if (tmp<iterDist.next()){                                   //if the new distance is lower than the old distance
+                if (tmp < iterDist.next()){                                   //if the new distance is lower than the old distance
                         iterDist.set(tmp);                                      //the new distance replaces the old one
                 }
             }
@@ -82,13 +89,14 @@ public class G04HM3 {
             ListIterator itrP = P.listIterator();
             ListIterator itrS = S.listIterator();
             ListIterator distPS = minDistPS.listIterator();
-            for(int h=0; h<psize; h++){
+            for(int h = 0; h < psize; h++){
                 Vector v = (Vector) itrP.next();
                 distPS.next();
-                if(h==maxIndex){        // if v is the famigerato vettore that maximizes the minimum distance
+                if(h == maxIndex){        // if v is the famigerato vettore that maximizes the minimum distance
                     itrP.remove();      //remove v form P (whose secret identity is P\S)
-                    distPS.remove();      //remove v's evil brother from S
-                    itrS.add(v);        //v moves in S
+                    distPS.remove();      //remove v's evil brother from DIST
+                    itrS.add(v);        //v moves in S // Since we haven't called yet itrS.next(), v is added to the
+                                                        // position 0
                 }
 
             }
@@ -107,6 +115,7 @@ public class G04HM3 {
         return S;
     }
 
+    // WE ARE NOT USING THIS METHOD
     public static ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S) {
         // I need P\S
         P.removeAll(S);
@@ -173,9 +182,9 @@ public class G04HM3 {
         double max = Double.MIN_VALUE;
         ListIterator<Double> iterS = S.listIterator();
         for (int i = 0; iterS.hasNext(); i++) {
-            double tmp=iterS.next();
+            double tmp = iterS.next();
             if (tmp > max) {
-                max=tmp;
+                max = tmp;
                 maxIdx = i;
             }
         }
@@ -208,40 +217,86 @@ public class G04HM3 {
         }
 
         ArrayList<Vector> S = new ArrayList<>();
-        ArrayList<Vector> PS = new ArrayList<>();       // ArrayList of P - S; messo per il ciclo for interno, da
-        // modificare dopo aver risolto la parte iniziale del ciclo for
-        // qua sotto
         //choose a random point on P, remove it and put it in S
         int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
         S.add(P.get(n));
-        P.remove(n);
-        Vector current;
-        double[] a, best, bestInit = {Double.MIN_VALUE, -1.0};
+        P.remove(n);        // Set P - S
+        WP.remove(n);
+        //ArrayList<Double> distance = new ArrayList<>();   //Da sostituire con ArrayList
+        ArrayList<Double> pProb;             //Da sostituire con ArrayList
+
+
+        //ArrayList in which to put all distances between P\S and S
+        ArrayList<Double> minDistPS = new ArrayList<>();
+        //Initialization of the List. It will be updated with complexity O(|P|) in the for loop
+        for(int i = 0; i < P.size(); i++){
+            minDistPS.add(Double.MAX_VALUE);
+        }
 
         for (int i = 0; i < k - 1; i++) {
-            // for() metodo per calcolare la distanza minima tra c e p appartenente all'insieme P - S (da rivedere il
-            // metodo in Partition)
-            // In questa parte calcolare anche un vettore di probabilità di "pescare" quel c_i
-            // con questa probabilità:      w_p*(d_p)^2/(sum_{q non center} w_q*(d_q)^2)
-            double[] pProb = null;    // Da inizializzare prima del ciclo for da fare del commento qua sopra
+
+            //at the beginning of each iteration, the iterator points at the beginning of the ArrayList P
+            ListIterator<Vector> iterP = P.listIterator();
+
+            //iterator on minDistPS
+            ListIterator<Double> iterDist = minDistPS.listIterator();
+
+            //Update minDistPS
+            Vector s = S.get(0); //the last vector added to S
+            for(int l = 0; iterP.hasNext(); l++){                         //for each element of P
+                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the l-th element of P and the last element of S
+                if (tmp < iterDist.next()){                                   //if the new distance is lower than the old distance
+                    iterDist.set(tmp);                                      //the new distance replaces the old one
+                }
+            }
+
+            iterDist = minDistPS.listIterator();
+            double sum=0;
+            while(iterDist.hasNext()){
+                sum+= Math.pow(iterDist.next(), 2);
+            }
+            iterDist = minDistPS.listIterator();
+            double[] pi = new double[P.size()];
+
+            for(int q=0; iterDist.hasNext(); q++){
+                pi[q]=WP.get(q)*Math.pow(iterDist.next(), 2)/sum*WP.get(q);
+            }
+
 
             // I draw a random number x that belongs to [0,1] to select the index of c_i as described in slide 15 of
             // "Clustering 2"
             double x = Math.random();
             double probSum = 0;
             int c_index = 0;
-            for (int j = 0; j < PS.size(); j++) { // Until the condition of x to be bigger than the sum of the probability
-                probSum += pProb[j];            // of selecting a certain p
+            for (int j = 0; j < P.size(); j++) { // Until the condition of x to be bigger than the sum of the probability
+                probSum += pi[j];            // of selecting a certain p
                 if (probSum > x) {
                     c_index = j;
                     break;
                 }
             }
-            S.add(PS.get(c_index));
-            PS.remove(c_index);
+
+            int psize = P.size();
+            ListIterator itrP = P.listIterator();
+            ListIterator itrS = S.listIterator();
+            ListIterator distPS = minDistPS.listIterator();
+            for(int h = 0; h < psize; h++){
+                Vector v = (Vector) itrP.next();
+                distPS.next();
+                if(h == c_index){        // if v is the famigerato vettore that maximizes the minimum distance
+                    itrP.remove();      //remove v form P (whose secret identity is P\S)
+                    distPS.remove();      //remove v's evil brother from DIST
+                    WP.remove(c_index);
+                    itrS.add(v);        //v moves in S // Since we haven't called yet itrS.next(), v is added to the
+                    // position 0
+                }
+
+            }
         }
         return S;
     }
+
+
 
     public static ArrayList<Double> kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
         ArrayList<Double> distances = new ArrayList<>();
