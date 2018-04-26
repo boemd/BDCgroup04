@@ -2,17 +2,14 @@ package it.unipd.dei.bdc1718;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
-import org.apache.spark.SparkConf;
-//import org.apache.spark.api.java.JavaPairRDD;
-//import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import scala.Tuple2;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
-import it.unipd.dei.bdc1718.InputOutput;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ListIterator;
+import java.util.Scanner;
+import java.util.stream.DoubleStream;
 
 public class G04HM3 {
     public static void main(String[] args) throws IOException {
@@ -24,25 +21,51 @@ public class G04HM3 {
         // Setup Spark
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
-        SparkConf conf = new SparkConf(true)
-                .setAppName("Preliminaries");
-        JavaSparkContext sc = new JavaSparkContext(conf);
-        ArrayList<Vector> A = InputOutput.readVectorsSeq(path);
-        printArrayList(A);
-        ArrayList<Vector> S = kcenter(A,3);
-        System.out.println(S.size());
-        printArrayList(S);
-
+        ArrayList<Vector> P = InputOutput.readVectorsSeq(path);
         ArrayList<Long> WP = new ArrayList<>();
-        for (int i=0; i<A.size(); i++){
+        for(int i=0; i<P.size(); i++){
             WP.add(1L);
         }
-        ArrayList<Vector> Spp = kmeansPP(A, WP, 3);
-        System.out.println("cazzinegri");
-        printArrayList(Spp);
+
+
+        int k;
+        int k1;
+        Scanner in = new Scanner(System.in);
+        System.out.println("Insert the value of k1:");
+        k1=in.nextInt();
+        System.out.println("Insert the value of k:");
+        k=in.nextInt();
+        in.close();
+
+
+        if(k>k1){
+            int tmp= k1;
+            k1=k;
+            k=tmp;
+        }
+
+        Long t0,t1;
+        t0=System.currentTimeMillis();
+        ArrayList<Vector> S = kcenter(P,k);
+        t1=System.currentTimeMillis();
+        System.out.println("Elapsed time for kcenter: "+(t1-t0)+" ms.");
+
+
+        ArrayList<Vector> C = kmeansPP(P, WP, k);
+        double obj = kmeansObject(P,C);
+        System.out.println("The value returned by kmeansObj is: "+obj);
+
+        ArrayList<Vector> X = kcenter(P, k1);
+        ArrayList<Long> WX = new ArrayList<>();
+        for(int i=0; i<X.size(); i++){
+            WX.add(1L);
+        }
+        C=kmeansPP(X,WX,k);
+        obj = kmeansObject(P,C);
+        System.out.println("The value returned by kmeansObj (coreset version) is: "+obj);
     }
 
-    public static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
+    private static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
         if (k <= 0) {
             return null;
         }
@@ -74,8 +97,8 @@ public class G04HM3 {
 
             //Update minDistPS
             Vector s = S.get(0); //the last vector added to S
-            for(int l = 0; iterP.hasNext(); l++){                         //for each element of P
-                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the l-th element of P and the last element of S
+            while(iterP.hasNext()){                                     //for each element of P
+                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the n-th element of P and the last element of S
                 if (tmp < iterDist.next()){                                   //if the new distance is lower than the old distance
                         iterDist.set(tmp);                                      //the new distance replaces the old one
                 }
@@ -110,13 +133,12 @@ public class G04HM3 {
             //remove a node also from minDistPS
             minDistPS.remove(maxIndex);
             */
-            printArrayList(S);
         }
         return S;
     }
 
     // WE ARE NOT USING THIS METHOD
-    public static ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S) {
+    private static ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S) {
         // I need P\S
         P.removeAll(S);
 
@@ -163,7 +185,7 @@ public class G04HM3 {
     }
     */
 
-    public static int argMin(Vector p, ArrayList<Vector> S) {
+    private static int argMin(Vector p, ArrayList<Vector> S) {
         int minIdx = -1;
         double minDistance = Double.MAX_VALUE;
         ListIterator<Vector> iterS = S.listIterator();
@@ -177,7 +199,7 @@ public class G04HM3 {
         return minIdx;
     }
 
-    public static int maxIdx(ArrayList<Double> S) {
+    private static int maxIdx(ArrayList<Double> S) {
         int maxIdx = -1;
         double max = Double.MIN_VALUE;
         ListIterator<Double> iterS = S.listIterator();
@@ -192,7 +214,7 @@ public class G04HM3 {
     }
 
     //it works, tested in other program
-    static void printClustering(ArrayList<ArrayList<Vector>> C) {
+    private static void printClustering(ArrayList<ArrayList<Vector>> C) {
         ListIterator<ArrayList<Vector>> iterC = C.listIterator();
         for (int i = 0; iterC.hasNext(); i++) {
             System.out.println("");
@@ -204,14 +226,14 @@ public class G04HM3 {
     }
 
     //it also works
-    static void printArrayList(ArrayList<Vector> P) {
+    private static void printArrayList(ArrayList<Vector> P) {
         ListIterator<Vector> iterP = P.listIterator();
         while (iterP.hasNext()) {
             System.out.println(Arrays.toString(iterP.next().toArray()));
         }
     }
 
-    public static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
+    private static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
         if (k <= 1) {
             return null;
         }
@@ -222,8 +244,6 @@ public class G04HM3 {
         S.add(P.get(n));
         P.remove(n);        // Set P - S
         WP.remove(n);
-        //ArrayList<Double> distance = new ArrayList<>();   //Da sostituire con ArrayList
-        ArrayList<Double> pProb;             //Da sostituire con ArrayList
 
 
         //ArrayList in which to put all distances between P\S and S
@@ -243,8 +263,8 @@ public class G04HM3 {
 
             //Update minDistPS
             Vector s = S.get(0); //the last vector added to S
-            for(int l = 0; iterP.hasNext(); l++){                         //for each element of P
-                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the l-th element of P and the last element of S
+            while(iterP.hasNext()){                         //for each element of P
+                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the n-th element of P and the last element of S
                 if (tmp < iterDist.next()){                                   //if the new distance is lower than the old distance
                     iterDist.set(tmp);                                      //the new distance replaces the old one
                 }
@@ -298,7 +318,7 @@ public class G04HM3 {
 
 
 
-    public static ArrayList<Double> kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
+    private static ArrayList<Double> kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
         ArrayList<Double> distances = new ArrayList<>();
         ListIterator<Vector> iterP = P.listIterator();
         while (iterP.hasNext()){
@@ -308,6 +328,26 @@ public class G04HM3 {
             distances.add(d);
         }
         return distances;
+    }
+
+    private static double kmeansObject(ArrayList<Vector> P, ArrayList<Vector> C){
+        double[] dists = new double[P.size()];
+        for(int t=0; t<dists.length; t++){
+            dists[t] = Double.MAX_VALUE;
+        }
+
+        ListIterator<Vector> iterC = C.listIterator();
+        while(iterC.hasNext()){
+            Vector currC = iterC.next();
+            ListIterator<Vector> iterP = P.listIterator();
+            for(int i = 0; iterP.hasNext(); i++){
+                double currDist = Vectors.sqdist(currC, iterP.next());
+                if(currDist<dists[i]){
+                    dists[i] = currDist;
+                }
+            }
+        }
+        return DoubleStream.of(dists).sum()/dists.length;
     }
 
 }
