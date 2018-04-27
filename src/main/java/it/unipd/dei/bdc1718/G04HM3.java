@@ -22,59 +22,59 @@ public class G04HM3 {
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
         ArrayList<Vector> P = InputOutput.readVectorsSeq(path);
-        ArrayList<Vector> P1 = InputOutput.readVectorsSeq(path);
-        ArrayList<Vector> P2 = InputOutput.readVectorsSeq(path);
-        ArrayList<Vector> P3 = InputOutput.readVectorsSeq(path);
-        ArrayList<Vector> P4 = InputOutput.readVectorsSeq(path);
-        ArrayList<Vector> P5 = InputOutput.readVectorsSeq(path);
-        ArrayList<Vector> P6 = InputOutput.readVectorsSeq(path);
-        int sz = P.size();
-        ArrayList<Long> WP = new ArrayList<>();
-        for(int i=0; i<P.size(); i++){
-            WP.add(1L);
-        }
 
+        int sz = P.size();
+
+        ArrayList<Long> WP = new ArrayList<>();
 
         int k;
         int k1;
         Scanner in = new Scanner(System.in);
-        System.out.println("Insert the value of k1:");
-        k1=in.nextInt();
+        System.out.println("Insert the value of k and k1, where k1 is bigger than k (if k is bigger than k1, then I'll" +
+                " swap them)");
         System.out.println("Insert the value of k:");
-        k=in.nextInt();
-        in.close(); //Mettere k1 maggiore di k
-        k=k%sz;
-        k1=k1%sz;
+        k1 = in.nextInt();
+        System.out.println("Insert the value of k1:");
+        k = in.nextInt();
+        in.close();
+        k = k % sz;
+        k1 = k1 % sz;
 
-        if(k>k1){
-            int tmp= k1;
-            k1=k;
-            k=tmp;
+        if(k > k1){
+            System.out.println("Swap k and k1");
+            int tmp = k1;
+            k1 = k;
+            k = tmp;
         }
+
+        // ----------------------------------------------- FIRST POINT -----------------------------------------------
 
         Long t0,t1;
-        t0=System.currentTimeMillis();
+        t0 = System.currentTimeMillis();
         ArrayList<Vector> S = kcenter(P,k);
-        t1=System.currentTimeMillis();
-        System.out.println("Elapsed time for kcenter: "+(t1-t0)+" ms.");
+        t1 = System.currentTimeMillis();
+        System.out.println("Elapsed time for kcenter: " + (t1-t0) + " ms.");
 
+        for(int i = 0; i < P.size(); i++){
+            WP.add(1L);
+        }
 
-        ArrayList<Vector> C = kmeansPP(P1, WP, k);
-        double object = kmeansObject(P2,C);
-        double obj = kmeansObj(P3,C);
-        System.out.println("The value returned by kmeansObject is: "+object);
-        System.out.println("The value returned by kmeansObj is: "+obj);
+        // ---------------------------------------------- SECOND POINT -----------------------------------------------
 
-        ArrayList<Vector> X = kcenter(P4, k1);
+        ArrayList<Vector> C = kmeansPP(P, WP, k);
+        double obj = kmeansObj(P,C);
+        System.out.println("The value returned by kmeansObj is: " + obj);
+
+        // ----------------------------------------------- THIRD POINT -----------------------------------------------
+
+        ArrayList<Vector> X = kcenter(P, k1);
         ArrayList<Long> WX = new ArrayList<>();
-        for(int i=0; i<X.size(); i++){
+        for(int i = 0; i < X.size(); i++){
             WX.add(1L);
         }
-        C=kmeansPP(X,WX,k);
-        object = kmeansObject(P5,C);
-        obj = kmeansObj(P6,C);
-        System.out.println("The value returned by kmeansObject is: "+object);
-        System.out.println("The value returned by kmeansObj (coreset version) is: "+obj);
+        C = kmeansPP(X,WX,k);
+        obj = kmeansObj(P,C);
+        System.out.println("The value returned by kmeansObj (coreset version) is: " + obj);
     }
 
     private static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
@@ -328,8 +328,6 @@ public class G04HM3 {
         return S;
     }
 
-
-
     private static double kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
         ArrayList<Double> distances = new ArrayList<>();
         ListIterator<Vector> iterP = P.listIterator();
@@ -347,25 +345,4 @@ public class G04HM3 {
 
         return sum/distances.size();
     }
-
-    private static double kmeansObject(ArrayList<Vector> P, ArrayList<Vector> C){
-        double[] dists = new double[P.size()];
-        for(int t=0; t<dists.length; t++){
-            dists[t] = Double.MAX_VALUE;
-        }
-
-        ListIterator<Vector> iterC = C.listIterator();
-        while(iterC.hasNext()){
-            Vector currC = iterC.next();
-            ListIterator<Vector> iterP = P.listIterator();
-            for(int i = 0; iterP.hasNext(); i++){
-                double currDist = Vectors.sqdist(currC, iterP.next());
-                if(currDist<dists[i]){
-                    dists[i] = currDist;
-                }
-            }
-        }
-        return DoubleStream.of(dists).sum()/dists.length;
-    }
-
 }
