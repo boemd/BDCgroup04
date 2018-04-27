@@ -22,6 +22,13 @@ public class G04HM3 {
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
         ArrayList<Vector> P = InputOutput.readVectorsSeq(path);
+        ArrayList<Vector> P1 = InputOutput.readVectorsSeq(path);
+        ArrayList<Vector> P2 = InputOutput.readVectorsSeq(path);
+        ArrayList<Vector> P3 = InputOutput.readVectorsSeq(path);
+        ArrayList<Vector> P4 = InputOutput.readVectorsSeq(path);
+        ArrayList<Vector> P5 = InputOutput.readVectorsSeq(path);
+        ArrayList<Vector> P6 = InputOutput.readVectorsSeq(path);
+        int sz = P.size();
         ArrayList<Long> WP = new ArrayList<>();
         for(int i=0; i<P.size(); i++){
             WP.add(1L);
@@ -35,8 +42,9 @@ public class G04HM3 {
         k1=in.nextInt();
         System.out.println("Insert the value of k:");
         k=in.nextInt();
-        in.close();
-
+        in.close(); //Mettere k1 maggiore di k
+        k=k%sz;
+        k1=k1%sz;
 
         if(k>k1){
             int tmp= k1;
@@ -51,17 +59,21 @@ public class G04HM3 {
         System.out.println("Elapsed time for kcenter: "+(t1-t0)+" ms.");
 
 
-        ArrayList<Vector> C = kmeansPP(P, WP, k);
-        double obj = kmeansObject(P,C);
+        ArrayList<Vector> C = kmeansPP(P1, WP, k);
+        double object = kmeansObject(P2,C);
+        double obj = kmeansObj(P3,C);
+        System.out.println("The value returned by kmeansObject is: "+object);
         System.out.println("The value returned by kmeansObj is: "+obj);
 
-        ArrayList<Vector> X = kcenter(P, k1);
+        ArrayList<Vector> X = kcenter(P4, k1);
         ArrayList<Long> WX = new ArrayList<>();
         for(int i=0; i<X.size(); i++){
             WX.add(1L);
         }
         C=kmeansPP(X,WX,k);
-        obj = kmeansObject(P,C);
+        object = kmeansObject(P5,C);
+        obj = kmeansObj(P6,C);
+        System.out.println("The value returned by kmeansObject is: "+object);
         System.out.println("The value returned by kmeansObj (coreset version) is: "+obj);
     }
 
@@ -100,7 +112,7 @@ public class G04HM3 {
             while(iterP.hasNext()){                                     //for each element of P
                 double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the n-th element of P and the last element of S
                 if (tmp < iterDist.next()){                                   //if the new distance is lower than the old distance
-                        iterDist.set(tmp);                                      //the new distance replaces the old one
+                    iterDist.set(tmp);                                      //the new distance replaces the old one
                 }
             }
 
@@ -119,7 +131,7 @@ public class G04HM3 {
                     itrP.remove();      //remove v form P (whose secret identity is P\S)
                     distPS.remove();      //remove v's evil brother from DIST
                     itrS.add(v);        //v moves in S // Since we haven't called yet itrS.next(), v is added to the
-                                                        // position 0
+                    // position 0
                 }
 
             }
@@ -213,25 +225,25 @@ public class G04HM3 {
         return maxIdx;
     }
 
-    //it works, tested in other program
-    private static void printClustering(ArrayList<ArrayList<Vector>> C) {
-        ListIterator<ArrayList<Vector>> iterC = C.listIterator();
-        for (int i = 0; iterC.hasNext(); i++) {
-            System.out.println("");
-            System.out.println("");
-            System.out.println("");
-            System.out.println("Cluster " + i + ":");
-            printArrayList(iterC.next());
-        }
-    }
-
-    //it also works
-    private static void printArrayList(ArrayList<Vector> P) {
-        ListIterator<Vector> iterP = P.listIterator();
-        while (iterP.hasNext()) {
-            System.out.println(Arrays.toString(iterP.next().toArray()));
-        }
-    }
+//    //it works, tested in other program
+//    private static void printClustering(ArrayList<ArrayList<Vector>> C) {
+//        ListIterator<ArrayList<Vector>> iterC = C.listIterator();
+//        for (int i = 0; iterC.hasNext(); i++) {
+//            System.out.println("");
+//            System.out.println("");
+//            System.out.println("");
+//            System.out.println("Cluster " + i + ":");
+//            printArrayList(iterC.next());
+//        }
+//    }
+//
+//    //it also works
+//    private static void printArrayList(ArrayList<Vector> P) {
+//        ListIterator<Vector> iterP = P.listIterator();
+//        while (iterP.hasNext()) {
+//            System.out.println(Arrays.toString(iterP.next().toArray()));
+//        }
+//    }
 
     private static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
         if (k <= 1) {
@@ -318,7 +330,7 @@ public class G04HM3 {
 
 
 
-    private static ArrayList<Double> kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
+    private static double kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
         ArrayList<Double> distances = new ArrayList<>();
         ListIterator<Vector> iterP = P.listIterator();
         while (iterP.hasNext()){
@@ -327,7 +339,13 @@ public class G04HM3 {
             double d = Vectors.sqdist(P.get(indexP),C.get(indexC));
             distances.add(d);
         }
-        return distances;
+        double sum = 0;
+        for(int i = 0; i < distances.size(); i++)
+        {
+            sum = sum + distances.get(i);
+        }
+
+        return sum/distances.size();
     }
 
     private static double kmeansObject(ArrayList<Vector> P, ArrayList<Vector> C){
