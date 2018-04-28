@@ -134,11 +134,11 @@ public class G04HM3 {
 
 
             int psize = P.size();
-            ListIterator itrP = P.listIterator();
-            ListIterator itrS = S.listIterator();
-            ListIterator distPS = minDistPS.listIterator();
+            ListIterator<Vector> itrP = P.listIterator();
+            ListIterator<Vector> itrS = S.listIterator();
+            ListIterator<Double> distPS = minDistPS.listIterator();
             for(int h = 0; h < psize; h++){
-                Vector v = (Vector) itrP.next();
+                Vector v = itrP.next();
                 distPS.next();
                 if(h == maxIndex){        // if v is the famigerato vettore that maximizes the minimum distance
                     itrP.remove();      //remove v form P (whose secret identity is P\S)
@@ -163,6 +163,7 @@ public class G04HM3 {
     }
 
     // WE ARE NOT USING THIS METHOD
+    /*
     private static ArrayList<ArrayList<Vector>> Partition(ArrayList<Vector> P, ArrayList<Vector> S) {
         // I need P\S
         P.removeAll(S);
@@ -189,6 +190,7 @@ public class G04HM3 {
 
         return C;
     }
+    */
 
     //DO WE REALLY NEED IT?
     /*
@@ -251,12 +253,14 @@ public class G04HM3 {
 //    }
 //
     //it also works
+    /*
     private static void printArrayList(ArrayList<Vector> P) {
         ListIterator<Vector> iterP = P.listIterator();
         while (iterP.hasNext()) {
             System.out.println(Arrays.toString(iterP.next().toArray()));
         }
     }
+    */
 
     private static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
         if (k <= 1) {
@@ -323,11 +327,11 @@ public class G04HM3 {
             }
 
             int psize = P.size();
-            ListIterator itrP = P.listIterator();
-            ListIterator itrS = S.listIterator();
-            ListIterator distPS = minDistPS.listIterator();
+            ListIterator<Vector> itrP = P.listIterator();
+            ListIterator<Vector> itrS = S.listIterator();
+            ListIterator<Double> distPS = minDistPS.listIterator();
             for(int h = 0; h < psize; h++){
-                Vector v = (Vector) itrP.next();
+                Vector v = itrP.next();
                 distPS.next();
                 if(h == c_index){        // if v is the famigerato vettore that maximizes the minimum distance
                     itrP.remove();      //remove v form P (whose secret identity is P\S)
@@ -352,9 +356,11 @@ public class G04HM3 {
             distances.add(d);
         }
         double sum = 0;
-        for(int i = 0; i < distances.size(); i++)
+        //for(int i = 0; i < distances.size(); i++)
+        for(Double elem: distances)
         {
-            sum = sum + distances.get(i);
+            //sum = sum + distances.get(i);
+            sum += elem;
         }
 
         return sum/distances.size();
