@@ -5,11 +5,7 @@ import org.apache.log4j.Level;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ListIterator;
-import java.util.Scanner;
-import java.util.stream.DoubleStream;
+import java.util.*;
 
 public class G04HM3 {
     public static void main(String[] args) throws IOException {
@@ -24,8 +20,12 @@ public class G04HM3 {
         ArrayList<Vector> P = InputOutput.readVectorsSeq(path);
 
         int sz = P.size();
-
+        System.out.println("sz: "+sz);
         ArrayList<Long> WP = new ArrayList<>();
+        for(int i=0; i<P.size(); i++){
+            WP.add(1L);
+        }
+
 
         int k;
         int k1;
@@ -33,10 +33,11 @@ public class G04HM3 {
         System.out.println("Insert the value of k and k1, where k1 is bigger than k (if k is bigger than k1, then I'll" +
                 " swap them)");
         System.out.println("Insert the value of k:");
-        k1 = in.nextInt();
-        System.out.println("Insert the value of k1:");
         k = in.nextInt();
+        System.out.println("Insert the value of k1:");
+        k1 = in.nextInt();
         in.close();
+
         k = k % sz;
         k1 = k1 % sz;
 
@@ -46,14 +47,18 @@ public class G04HM3 {
             k1 = k;
             k = tmp;
         }
+        System.out.println("k:"+k);
+        System.out.println("k1:"+k1);
 
         // ----------------------------------------------- FIRST POINT -----------------------------------------------
 
         Long t0,t1;
-        t0 = System.currentTimeMillis();
-        ArrayList<Vector> S = kcenter(P,k);
-        t1 = System.currentTimeMillis();
-        System.out.println("Elapsed time for kcenter: " + (t1-t0) + " ms.");
+        t0=System.currentTimeMillis();
+        kcenter(P,k);
+
+        P = InputOutput.readVectorsSeq(path);
+        t1=System.currentTimeMillis();
+        System.out.println("Elapsed time for kcenter: "+(t1-t0)+" ms.");
 
         for(int i = 0; i < P.size(); i++){
             WP.add(1L);
@@ -62,17 +67,24 @@ public class G04HM3 {
         // ---------------------------------------------- SECOND POINT -----------------------------------------------
 
         ArrayList<Vector> C = kmeansPP(P, WP, k);
+        //printArrayList(C);
+        P = InputOutput.readVectorsSeq(path);
+
         double obj = kmeansObj(P,C);
+        P = InputOutput.readVectorsSeq(path);
+
         System.out.println("The value returned by kmeansObj is: " + obj);
 
         // ----------------------------------------------- THIRD POINT -----------------------------------------------
 
         ArrayList<Vector> X = kcenter(P, k1);
+        P = InputOutput.readVectorsSeq(path);
         ArrayList<Long> WX = new ArrayList<>();
         for(int i = 0; i < X.size(); i++){
             WX.add(1L);
         }
         C = kmeansPP(X,WX,k);
+        //printArrayList(C);
         obj = kmeansObj(P,C);
         System.out.println("The value returned by kmeansObj (coreset version) is: " + obj);
     }
@@ -86,7 +98,8 @@ public class G04HM3 {
         ArrayList<Vector> S = new ArrayList<>();
 
         //choose a random point on P, remove it and put it in S
-        int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
+        Random rand = new Random();
+        int n = rand.nextInt(P.size()); // Arbitrary point c_1
         S.add(P.get(n));
         P.remove(n);        // Set P - S
 
@@ -237,13 +250,13 @@ public class G04HM3 {
 //        }
 //    }
 //
-//    //it also works
-//    private static void printArrayList(ArrayList<Vector> P) {
-//        ListIterator<Vector> iterP = P.listIterator();
-//        while (iterP.hasNext()) {
-//            System.out.println(Arrays.toString(iterP.next().toArray()));
-//        }
-//    }
+    //it also works
+    private static void printArrayList(ArrayList<Vector> P) {
+        ListIterator<Vector> iterP = P.listIterator();
+        while (iterP.hasNext()) {
+            System.out.println(Arrays.toString(iterP.next().toArray()));
+        }
+    }
 
     private static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
         if (k <= 1) {
@@ -252,7 +265,8 @@ public class G04HM3 {
 
         ArrayList<Vector> S = new ArrayList<>();
         //choose a random point on P, remove it and put it in S
-        int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
+        Random rand = new Random();
+        int n = rand.nextInt(P.size()); // Arbitrary point c_1
         S.add(P.get(n));
         P.remove(n);        // Set P - S
         WP.remove(n);
@@ -345,4 +359,5 @@ public class G04HM3 {
 
         return sum/distances.size();
     }
+
 }
