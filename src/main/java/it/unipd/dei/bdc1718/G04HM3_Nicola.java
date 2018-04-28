@@ -26,7 +26,10 @@ public class G04HM3_Nicola {
         int k;
         int k1;
         Scanner in = new Scanner(System.in);
-        System.out.println("Insert the value of k and k1, where k1 must be bigger than k");
+        System.out.println("Insert the value of k and k1, where k must be smaller than k1, which respectively are the " +
+                "number of centers computed by the FFT algorithm, and the number of centers computed with a weighted " +
+                "variant of the kmeans++ algorithm.");
+
         System.out.println("Insert the value of k1:");
         k1 = in.nextInt();
         while (k1 > sz) {
@@ -160,54 +163,55 @@ public class G04HM3_Nicola {
         return maxIdx;
     }
 
-    // kmeansPP method:     <---------------- SONO ARRIVATO QUA A COMMENTARE (con l'eccezione del metodo argMin()
+    // kmeansPP method:
     private static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
         if (k <= 1) {
             return null;
         }
 
         ArrayList<Vector> S = new ArrayList<>();
-        //choose a random point on P, remove it and put it in S
+        // Choose a random point on P, remove it and put it in S
         int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
         S.add(P.get(n));
-        P.remove(n);        // Set P - S
+        P.remove(n);        // As in kcenter method, we use this variable as the set P\S
         WP.remove(n);
 
 
-        //ArrayList in which to put all distances between P\S and S
+        // ArrayList in which to put all distances between P\S and S
         ArrayList<Double> minDistPS = new ArrayList<>();
-        //Initialization of the List. It will be updated with complexity O(|P|) in the for loop
+        // Initialization of the List. It will be updated with complexity O(|P|) in the for loop
         for(int i = 0; i < P.size(); i++){
             minDistPS.add(Double.MAX_VALUE);
         }
 
         for (int i = 0; i < k - 1; i++) {
 
-            //at the beginning of each iteration, the iterator points at the beginning of the ArrayList P
+            // At the beginning of each iteration, the iterator points at the beginning of the ArrayList P
             ListIterator<Vector> iterP = P.listIterator();
 
-            //iterator on minDistPS
+            // Iterator on minDistPS
             ListIterator<Double> iterDist = minDistPS.listIterator();
 
-            //Update minDistPS
-            Vector s = S.get(0); //the last vector added to S
-            while(iterP.hasNext()){                         //for each element of P
-                double tmp = Vectors.sqdist(iterP.next(), s);               //distance of the n-th element of P and the last element of S
-                if (tmp < iterDist.next()){                                   //if the new distance is lower than the old distance
-                    iterDist.set(tmp);                                      //the new distance replaces the old one
+            // Update minDistPS
+            Vector s = S.get(0); // The last vector added to S
+            while(iterP.hasNext()){                             //for each element of P
+                double tmp = Vectors.sqdist(iterP.next(), s);   //distance of the n-th element of P and the last element of S
+                if (tmp < iterDist.next()){                     //if the new distance is lower than the old distance
+                    iterDist.set(tmp);                          //the new distance replaces the old one
                 }
             }
 
+            // This part is needed to obtain the probability to choose each element of P
             iterDist = minDistPS.listIterator();
             double sum=0;
             while(iterDist.hasNext()){
-                sum+= Math.pow(iterDist.next(), 2);
-            }
+                sum+= Math.pow(iterDist.next(), 2);             // DA CONTROLLARE PER IL FATTO CHE sqdist RESTITUISCE
+            }                                                   // UNA DISTANZA GIA' AL QUADRATO
             iterDist = minDistPS.listIterator();
             double[] pi = new double[P.size()];
 
             for(int q=0; iterDist.hasNext(); q++){
-                pi[q]=WP.get(q)*Math.pow(iterDist.next(), 2)/sum*WP.get(q);
+                pi[q]=WP.get(q)*Math.pow(iterDist.next(), 2)/sum*WP.get(q); // Variant probability for kmeans++
             }
 
 
@@ -216,14 +220,15 @@ public class G04HM3_Nicola {
             double x = Math.random();
             double probSum = 0;
             int c_index = 0;
-            for (int j = 0; j < P.size(); j++) { // Until the condition of x to be bigger than the sum of the probability
-                probSum += pi[j];            // of selecting a certain p
+            for (int j = 0; j < P.size(); j++) {    // Until the condition of x to be bigger than the sum of the probability
+                probSum += pi[j];                   // of selecting a certain p
                 if (probSum > x) {
                     c_index = j;
                     break;
                 }
             }
 
+            // "for" loop to find the vector of P\S which is in the position c_index
             int psize = P.size();
             ListIterator itrP = P.listIterator();
             ListIterator itrS = S.listIterator();
@@ -231,35 +236,35 @@ public class G04HM3_Nicola {
             for(int h = 0; h < psize; h++){
                 Vector v = (Vector) itrP.next();
                 distPS.next();
-                if(h == c_index){        // if v is the famigerato vettore that maximizes the minimum distance
-                    itrP.remove();      //remove v form P (whose secret identity is P\S)
-                    distPS.remove();      //remove v's evil brother from DIST
+                if(h == c_index){
+                    itrP.remove();
+                    distPS.remove();
                     WP.remove(c_index);
-                    itrS.add(v);        //v moves in S // Since we haven't called yet itrS.next(), v is added to the
-                    // position 0
+                    itrS.add(v);        // Since we haven't called yet itrS.next(), v is added to the position 0
                 }
-
             }
         }
         return S;
     }
 
+    // kmeansObj method:
     private static double kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
         ArrayList<Double> distances = new ArrayList<>();
         ListIterator<Vector> iterP = P.listIterator();
         while (iterP.hasNext()){
             int indexP = iterP.nextIndex();
-            int indexC = argMin(iterP.next(), C);
-            double d = Vectors.sqdist(P.get(indexP),C.get(indexC));
-            distances.add(d);
+            int indexC = argMin(iterP.next(), C);   // Find the indexC of the element of C which have the minimum distance
+                                                    // from the actual element of P
+            double d = Vectors.sqdist(P.get(indexP),C.get(indexC)); // Compute that distance
+            distances.add(d);                       // Insert that distance in an ArrayList
         }
         double sum = 0;
         for(int i = 0; i < distances.size(); i++)
         {
-            sum = sum + distances.get(i);
+            sum = sum + distances.get(i);           // Sum of every element of distances
         }
 
-        return sum/distances.size();
+        return sum/distances.size();                // Average squared distance
     }
 
     // Method to find the index of the point of S with min distance from p; used in the kmeansObj method
