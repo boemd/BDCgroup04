@@ -22,13 +22,14 @@ public class G04HM3_Nicola {
         ArrayList<Vector> P = InputOutput.readVectorsSeq(path);
 
         int sz = P.size();                      // Size of the ArrayList P
+        System.out.println("Size of P: " + sz);
 
         int k;
         int k1;
         Scanner in = new Scanner(System.in);
         System.out.println("Insert the value of k and k1, where k must be smaller than k1, which respectively are the " +
-                "number of centers computed by the FFT algorithm, and the number of centers computed with a weighted " +
-                "variant of the kmeans++ algorithm.");
+                "number of centers computed by the Farthest-First Traversal algorithm, and the number of centers computed " +
+                "with a weighted variant of the kmeans++ algorithm.");
 
         System.out.println("Insert the value of k1:");
         k1 = in.nextInt();
@@ -63,23 +64,29 @@ public class G04HM3_Nicola {
 
         // ---------------------------------------------- SECOND POINT -----------------------------------------------
 
+        P = InputOutput.readVectorsSeq(path);                                   // We initialize P again since our method
+                                                                                // modifies it
         ArrayList<Long> WP = new ArrayList<>();                                 // Set of weights for P
         for(int i = 0; i < P.size(); i++){                                      // All weights of P equal to 1
             WP.add(1L);
         }
 
         ArrayList<Vector> C = kmeansPP(P, WP, k);   // <--------- kmeansPP
+        P = InputOutput.readVectorsSeq(path);
         double obj = kmeansObj(P,C);                // <--------- kmeansObj
+        P = InputOutput.readVectorsSeq(path);
         System.out.println("The value returned by kmeansObj is: " + obj);       // Result of kmeansObj
 
         // ----------------------------------------------- THIRD POINT -----------------------------------------------
 
         ArrayList<Vector> X = kcenter(P, k1);       // <--------- kcenter
+        P = InputOutput.readVectorsSeq(path);
         ArrayList<Long> WX = new ArrayList<>();
         for(int i = 0; i < X.size(); i++){      // All weights of X equal to 1
             WX.add(1L);
         }
         C = kmeansPP(X,WX,k);                       // <--------- kmeansPP
+        P = InputOutput.readVectorsSeq(path);
         obj = kmeansObj(P,C);                       // <--------- kmeansObj
         System.out.println("The value returned by kmeansObj (coreset version) is: " + obj);
         // Result of kmeansObj for the coreset
