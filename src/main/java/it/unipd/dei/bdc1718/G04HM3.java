@@ -58,7 +58,7 @@ public class G04HM3 {
 
         Long t0,t1;
         t0 = System.currentTimeMillis();                                        // Start
-        ArrayList<Vector> S = kcenter(P,k);         // <--------- kcenter
+        kcenter(P,k);                             // <--------- kcenter
         t1 = System.currentTimeMillis();
         System.out.println("Elapsed time for kcenter: " + (t1-t0) + " ms.");    // Running time
 
@@ -93,7 +93,11 @@ public class G04HM3 {
         // version
     }
 
-    // kcenter method:
+    /**
+     * K-center method:
+     * Complexity: O(k*|P|)
+     * Since we iterate on P in a loop of length k
+     */
     private static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
         if (k <= 0) {
             return null;
@@ -105,7 +109,7 @@ public class G04HM3 {
         // Choose a random point on P, remove it and put it in S
         int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
         S.add(P.get(n));
-        P.remove(n);        // IMPORTANT: we call this P but we use this as the ArrayList P\S
+        P.remove(n);        // IMPORTANT: we call this P but we use this as P\S
 
 
         // ArrayList in which to put all distances between P\S and S
@@ -125,9 +129,9 @@ public class G04HM3 {
             ListIterator<Double> iterDist = minDistPS.listIterator();
 
             // Update minDistPS
-            Vector s = S.get(0); //the last vector added to S
+            Vector s = S.get(0); //the last point added to S
             while(iterP.hasNext()){                             // for each element of P
-                double tmp = Vectors.sqdist(iterP.next(), s);   // distance of the n-th element of P and the last element of S
+                double tmp = Vectors.sqdist(iterP.next(), s);   // distance of the current element of P and the last element added in S (which has position 0)
                 if (tmp < iterDist.next()){                     // if the new distance is lower than the old distance
                     iterDist.set(tmp);                          // the new distance replaces the old one
                 }
@@ -155,7 +159,11 @@ public class G04HM3 {
         return S;
     }
 
-    // Method to find the index of the point of P\S with higher distance from S; used in the kcenter method
+    /**
+     * @param S input ArrayList
+     * Method to find the index of the point of S with the higher value
+     * Complexity: O(|S|)
+     */
     private static int maxIdx(ArrayList<Double> S) {
         int maxIdx = -1;
         double max = Double.MIN_VALUE;
@@ -170,7 +178,11 @@ public class G04HM3 {
         return maxIdx;
     }
 
-    // kmeansPP method:
+    /**
+     * K-meansPP method:
+     * Complexity: O(k*|P|)
+     * Since we iterate on P in a loop of length k
+     */
     private static ArrayList<Vector> kmeansPP(ArrayList<Vector> P, ArrayList<Long> WP, int k) {
         if (k <= 1) {
             return null;
@@ -254,7 +266,10 @@ public class G04HM3 {
         return S;
     }
 
-    // kmeansObj method:
+    /**
+     * K-meansObj method
+     * Complexity: O(|P|*|C|)=O(k*|P|)
+     */
     private static double kmeansObj(ArrayList<Vector> P, ArrayList<Vector> C){
         ArrayList<Double> distances = new ArrayList<>();
         ListIterator<Vector> iterP = P.listIterator();
@@ -274,7 +289,11 @@ public class G04HM3 {
         return sum/distances.size();                // Average squared distance
     }
 
-    // Method to find the index of the point of S with min distance from p; used in the kmeansObj method
+    /**
+     * Method to find the index of the point of S with min distance from p
+     * Used in the K-meansObj method
+     * Complexity: O(S)
+     */
     private static int argMin(Vector p, ArrayList<Vector> S) {
         int minIdx = -1;
         double minDistance = Double.MAX_VALUE;
