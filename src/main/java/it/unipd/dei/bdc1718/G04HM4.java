@@ -1,5 +1,6 @@
 package it.unipd.dei.bdc1718;
 
+import org.apache.commons.collections.iterators.ArrayListIterator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 import org.apache.spark.SparkConf;
@@ -32,4 +33,21 @@ public class G04HM4 {
         // Create JavaRDD from input path
         JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path);
     }
+
+    static double measure(ArrayList<Vector> pointslist){
+
+        int numPoints = pointslist.size();
+        double sum = 0;
+
+        for(int i=0; i<numPoints; i++){
+            for(int j=i+1; j<numPoints; j++){
+                sum += Math.sqrt(Vectors.sqdist(pointslist.get(i),pointslist.get(j)));
+            }
+        }
+        return sum/(numPoints*(numPoints-1)/2);
+    }
 }
+
+
+
+
