@@ -35,7 +35,32 @@ public class G04HM4 {
         JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path);
     }
 
-    static double measure(ArrayList<Vector> pointslist){
+    /**
+     * First method required by the assignment
+     * runMapReduce(pointsrdd, k, numBlocks)
+     * A method runMapReduce(pointsrdd,k,numBlocks) that receives in input a set of points represented by a JavaRDD<Vector>
+     * pointsrdd and two integers k and numBlocks, and does the following things:
+     * (a) partitions pointsrdd into numBlocks subsets;
+     * (b) extracts k points from each subset by running the sequential Farthest-First Traversal algorithm implemented for
+     *      Homework 3;
+     * (c) gathers the numBlocks*k points extracted into an ArrayList<Vector> coreset;
+     * (d) returns an ArrayList<Vector> object with k points determined by running the sequential max-diversity algorithm
+     *      with input coreset and k. The code of the sequential algorithm can be downloaded here.
+     */
+
+    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks) {
+        // (a)
+        // (b)
+        // (c)
+        // (d)
+        return null;
+    }
+
+    /**
+     * Second method required by the assignment
+     * measure(pointslist)
+     */
+    static double measure(ArrayList<Vector> pointslist) {
 
         int numPoints = pointslist.size();
         double sum = 0;
@@ -48,11 +73,9 @@ public class G04HM4 {
         return sum/(numPoints*(numPoints-1)/2);
     }
 
-
     /**
      * Sequential approximation algorithm based on matching provided by the link in the assignment.
      */
-
     public static ArrayList<Vector> runSequential(final ArrayList<Vector> points, int k) {
         final int n = points.size();
         if (k >= n) {
