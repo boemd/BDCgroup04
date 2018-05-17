@@ -31,8 +31,22 @@ public class G04HM4 {
         // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the file
         int numPartitions = sc.defaultParallelism();
 
+        int k;
+        int numBlocks;
+        Scanner in = new Scanner(System.in);
+        System.out.println("Insert the value of the two integers k and numBlocks");
+        System.out.println("Insert the value of k:");
+        k = in.nextInt();
+        System.out.println("Insert the value of numBlocks:");
+        numBlocks = in.nextInt();
+        in.close();
+
         // Create JavaRDD from input path
-        JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path);
+        JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).repartition(numBlocks).cache();    // Commento di Nicola: Secondo me il repartition(numBlocks) va fatto
+                                                                                                        // dentro al runMapReduce
+
+
+
     }
 
     /**
@@ -50,7 +64,11 @@ public class G04HM4 {
 
     static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks) {
         // (a)
+        JavaRDD<Vector> partpointsrdd = pointsrdd.repartition(numBlocks);
+
         // (b)
+        // ArrayList<Vector> fftsubsets = kcenter(partpointsrdd, k);        // Bisogna passare da JavaRDD a ArrayList
+
         // (c)
         // (d)
         return null;
@@ -124,6 +142,87 @@ public class G04HM4 {
             throw new IllegalStateException("Result of the wrong size");
         }
         return result;
+    }
+
+    /**
+     * Farthest - First Traversal Algorithm
+     */
+    private static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
+        if (k <= 0) {
+            return null;
+        }
+
+        // ArrayList in which to put the centers
+        ArrayList<Vector> S = new ArrayList<>();
+
+        // Choose a random point on P, remove it and put it in S
+        int n = (int) (Math.random() * (P.size() - 1)); // Arbitrary point c_1
+        S.add(P.get(n));
+        P.remove(n);        // IMPORTANT: we call this P but we use this as P\S
+
+
+        // ArrayList in which to put all distances between P\S and S
+        ArrayList<Double> minDistPS = new ArrayList<>();
+        // Initialization of the List, it will be updated with complexity O(|P|) in the "for" loop
+        for(int i = 0; i < P.size(); i++){
+            minDistPS.add(Double.MAX_VALUE);
+        }
+
+
+        for (int i = 0; i < k-1; i++) {
+
+            // At the beginning of each iteration, the iterator points at the beginning of the ArrayList P
+            ListIterator<Vector> iterP = P.listIterator();
+
+            // Iterator on minDistPS
+            ListIterator<Double> iterDist = minDistPS.listIterator();
+
+            // Update minDistPS
+            Vector s = S.get(0); //the last point added to S
+            while(iterP.hasNext()){                             // for each element of P
+                double tmp = Vectors.sqdist(iterP.next(), s);   // distance of the current element of P and the last element added in S (which has position 0)
+                if (tmp < iterDist.next()){                     // if the new distance is lower than the old distance
+                    iterDist.set(tmp);                          // the new distance replaces the old one
+                }
+            }
+
+            // Find the index of the point of P\S with higher distance from S
+            int maxIndex = maxIdx(minDistPS);
+
+            // This part is needed to add the vector from P to S
+            int psize = P.size();
+            ListIterator itrP = P.listIterator();
+            ListIterator itrS = S.listIterator();
+            ListIterator distPS = minDistPS.listIterator();
+            for (int h = 0; h < psize; h++) {   // "for" loop to find the vector of P\S which is in the position maxIndex
+                Vector v = (Vector) itrP.next();
+                distPS.next();
+                if (h == maxIndex){
+                    itrP.remove();
+                    distPS.remove();
+                    itrS.add(v);                // Since we haven't called yet itrS.next(), v is added to the position 0
+                }
+
+            }
+        }
+        return S;
+    }
+
+    /**
+     * Support method for kcenter
+     */
+    private static int maxIdx(ArrayList<Double> S) {
+        int maxIdx = -1;
+        double max = Double.MIN_VALUE;
+        ListIterator<Double> iterS = S.listIterator();
+        for (int i = 0; iterS.hasNext(); i++) {
+            double tmp = iterS.next();
+            if (tmp > max) {
+                max = tmp;
+                maxIdx = i;
+            }
+        }
+        return maxIdx;
     }
 }
 
