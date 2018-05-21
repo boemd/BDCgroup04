@@ -65,8 +65,14 @@ public class G04HM4 {
         // (a)
         Random r = new Random();
 
-        JavaRDD<Tuple2<Integer,Vector>> rddpointa = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector))) .groupByKey()
-
+        pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector))) .groupByKey() // es 1A
+        .mapToPair( (it) -> {
+            ArrayList<Vector> v = new ArrayList<>();
+            for (Vector vec : it._2)
+            { v.add(vec); }
+            ArrayList<Vector> kcen = kcenter(v,k);
+            return new Tuple2<>(0,kcen);
+        });
         // (b)
         // ArrayList<Vector> fftsubsets = kcenter(partpointsrdd, k);        // Bisogna passare da JavaRDD a ArrayList
 
