@@ -9,11 +9,10 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import scala.Tuple2;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ListIterator;
-import java.util.Scanner;
+import java.util.*;
 
 public class G04HM4 {
     public static void main(String[] args) throws IOException {
@@ -64,10 +63,13 @@ public class G04HM4 {
 
     static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks) {
         // (a)
-        JavaRDD<Vector> partpointsrdd = pointsrdd.repartition(numBlocks);
+        Random r = new Random();
+
+        JavaRDD<Tuple2<Integer,Vector>> rddpointa = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector))) .groupByKey()
 
         // (b)
         // ArrayList<Vector> fftsubsets = kcenter(partpointsrdd, k);        // Bisogna passare da JavaRDD a ArrayList
+
 
         // (c)
         // (d)
