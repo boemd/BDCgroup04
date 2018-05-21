@@ -41,10 +41,12 @@ public class G04HM4 {
         in.close();
 
         // Create JavaRDD from input path
-        JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).repartition(numBlocks).cache();    // Commento di Nicola: Secondo me il repartition(numBlocks) va fatto
-                                                                                                        // dentro al runMapReduce
+        JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).repartition(numBlocks).cache();
 
+        ArrayList<Vector> out = runMapReduce(pointsrdd,k,numBlocks);
 
+        double dst =   measure(out);
+        System.out.println(dst);
 
     }
 
@@ -65,21 +67,35 @@ public class G04HM4 {
         // (a)
         Random r = new Random();
 
-        pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector))) .groupByKey() // es 1A
-        .mapToPair( (it) -> {
-            ArrayList<Vector> v = new ArrayList<>();
-            for (Vector vec : it._2)
-            { v.add(vec); }
-            ArrayList<Vector> kcen = kcenter(v,k);
-            return new Tuple2<>(0,kcen);
+        JavaPairRDD<Integer, ArrayList<Vector>> a = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector)))
+                .groupByKey() // es 1A
+                .mapToPair( (it) -> {
+                    ArrayList<Vector> v = new ArrayList<>();
+                    for (Vector vec : it._2)
+                    { v.add(vec); }
+                    ArrayList<Vector> kcen = kcenter(v,k);
+                    return new Tuple2<>(0,kcen);
         });
-        // (b)
-        // ArrayList<Vector> fftsubsets = kcenter(partpointsrdd, k);        // Bisogna passare da JavaRDD a ArrayList
+
+        JavaRDD<ArrayList> cazzo = a.map( (tupla) -> tupla._2);
+
+        List<ArrayList> dios = cazzo.collect();
+
+        ArrayList<Vector> coreset = new ArrayList<Vector>();
 
 
-        // (c)
-        // (d)
-        return null;
+        ListIterator<ArrayList> iter = dios.listIterator();
+        while(iter.hasNext()){
+            ListIterator ali = iter.next().listIterator();
+            while(ali.hasNext()){
+                Vector v = (Vector) ali.next();
+                coreset.add(v);
+            }
+        }
+
+        ArrayList<Vector> finalClustering = runSequential(coreset, k);
+
+        return finalClustering;
     }
 
     /**
