@@ -21,6 +21,7 @@ public class G04HM4 {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
         String path = args[0];
+        int k = args[1];
 
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
@@ -31,18 +32,10 @@ public class G04HM4 {
         // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the file
         int numPartitions = sc.defaultParallelism();
 
-        int k;
-        int numBlocks;
-        Scanner in = new Scanner(System.in);
-        System.out.println("Insert the value of the two integers k and numBlocks");
-        System.out.println("Insert the value of k:");
-        k = in.nextInt();
-        System.out.println("Insert the value of numBlocks:");
-        numBlocks = in.nextInt();
-        in.close();
+        int numBlocks = 72*8*2;
 
         // Create JavaRDD from input path
-        JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).repartition(numBlocks).cache();
+        JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).cache();
 
         ArrayList<Vector> out = runMapReduce(pointsrdd,k,numBlocks);
 
