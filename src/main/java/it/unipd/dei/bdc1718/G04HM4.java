@@ -9,6 +9,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.codehaus.commons.nullanalysis.NotNull;
 import scala.Tuple2;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class G04HM4 {
         ArrayList<Vector> out = runMapReduce(pointsrdd,k,numBlocks);
 
         double dst =   measure(out);
-        System.out.println(dst);
+        System.out.println("The average distance among the solution points is: "+dst);
 
     }
 
@@ -66,8 +67,8 @@ public class G04HM4 {
     static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks) {
         // (a)
         Random r = new Random();
-
-        JavaPairRDD<Integer, ArrayList<Vector>> a = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector)))
+        long t0 = System.currentTimeMillis();
+        List<ArrayList<Vector>> a = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector)))
                 .groupByKey() // es 1A
                 .mapToPair( (it) -> {
                     ArrayList<Vector> v = new ArrayList<>();
@@ -75,16 +76,14 @@ public class G04HM4 {
                     { v.add(vec); }
                     ArrayList<Vector> kcen = kcenter(v,k);
                     return new Tuple2<>(0,kcen);
-        });
+                })
+                .map( (tupla) -> tupla._2)
+                .collect();
 
-        JavaRDD<ArrayList> cazzo = a.map( (tupla) -> tupla._2);
-
-        List<ArrayList> dios = cazzo.collect();
-
-        ArrayList<Vector> coreset = new ArrayList<Vector>();
+        ArrayList<Vector> coreset = new ArrayList<>();
 
 
-        ListIterator<ArrayList> iter = dios.listIterator();
+        ListIterator<ArrayList<Vector>> iter = a.listIterator();
         while(iter.hasNext()){
             ListIterator ali = iter.next().listIterator();
             while(ali.hasNext()){
@@ -92,17 +91,61 @@ public class G04HM4 {
                 coreset.add(v);
             }
         }
+        long t1 = System.currentTimeMillis();
+        System.out.println();
+        System.out.println("Time taken by the coreset construction: " + (t1-t0) + "ms.");
 
         ArrayList<Vector> finalClustering = runSequential(coreset, k);
 
+        long t2 = System.currentTimeMillis();
+        System.out.println("Time taken by the computation of the final solution: " + (t2-t1) + " ms.");
         return finalClustering;
+    }
+
+    @Deprecated
+    static ArrayList<Vector> rmr(JavaRDD<Vector> pointsrdd, int k, int numBlocks){
+
+        Long t0 = System.currentTimeMillis();
+
+        Random r = new Random();
+        JavaPairRDD<Integer, Vector> p1 = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector)));
+        JavaPairRDD<Integer, Iterable<Vector> > p2 = p1.groupByKey();
+
+        JavaPairRDD<Integer, ArrayList<Vector>> p3 = p2.mapToPair((itbl) -> {
+            Iterator<Vector> iter = itbl._2().iterator();
+            ArrayList<Vector> vectors_list = new ArrayList<>();
+            while(iter.hasNext()){
+                vectors_list.add(iter.next());
+            }
+            ArrayList<Vector> ret = kcenter(vectors_list, k);
+            return new Tuple2<>(0, ret);
+        });
+        JavaPairRDD<Integer, ArrayList<Vector>> p4 = p3.reduceByKey((x,y)-> {
+            ListIterator<Vector> iter = y.listIterator();
+            while(iter.hasNext()){
+                x.add(iter.next());
+            }
+            return x;
+        });
+        JavaRDD<ArrayList<Vector>> p5 = p4.map(x -> x._2());
+        ArrayList<Vector> coreset = new ArrayList(p5.collect());
+
+        long t1 = System.currentTimeMillis();
+        System.out.println("Time taken by the coreset construction: " + (t1-t0) + "ms.");
+
+        ArrayList<Vector> output = runSequential(coreset, k);
+
+        long t2 = System.currentTimeMillis();
+        System.out.println("Time taken by the computation of the final solution: " + (t2-t1) + " ms.");
+
+        return output;
     }
 
     /**
      * Second method required by the assignment
      * measure(pointslist)
      */
-    static double measure(ArrayList<Vector> pointslist) {
+    private static double measure(ArrayList<Vector> pointslist) {
 
         int numPoints = pointslist.size();
         double sum = 0;
@@ -118,7 +161,7 @@ public class G04HM4 {
     /**
      * Sequential approximation algorithm based on matching provided by the link in the assignment.
      */
-    public static ArrayList<Vector> runSequential(final ArrayList<Vector> points, int k) {
+    private static ArrayList<Vector> runSequential(final ArrayList<Vector> points, int k) {
         final int n = points.size();
         if (k >= n) {
             return points;
@@ -249,7 +292,6 @@ public class G04HM4 {
         return maxIdx;
     }
 }
-
 
 
 
