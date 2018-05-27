@@ -21,7 +21,7 @@ public class G04HM4 {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
         String path = args[0];
-        int k = args[1];
+        // int k = Integer.parseInt(args[1]);
 
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
@@ -32,14 +32,24 @@ public class G04HM4 {
         // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the file
         int numPartitions = sc.defaultParallelism();
 
-        int numBlocks = 72*8*2;
+        // int numBlocks = 72*8*2;
+
+        int numBlocks, k;
+
+        Scanner in = new Scanner(System.in);
+        System.out.println("Insert the value of numBlocks and k.");
+        System.out.println("Insert the value of numBlocks:");
+        numBlocks = in.nextInt();
+        System.out.println("Insert the value of k:");
+        k = in.nextInt();
+        in.close();
 
         // Create JavaRDD from input path
         JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).cache();
 
         ArrayList<Vector> out = runMapReduce(pointsrdd,k,numBlocks);
 
-        double dst =   measure(out);
+        double dst = measure(out);
         System.out.println("The average distance among the solution points is: "+dst);
 
     }
