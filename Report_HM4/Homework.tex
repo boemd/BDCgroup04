@@ -1,0 +1,115 @@
+% --------------------------------------------------------------
+% This is all preamble stuff that you don't have to worry about.
+% Head down to where it says "Start here"
+% --------------------------------------------------------------
+ 
+\documentclass[10pt]{article}
+ 
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{float}
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{reflection}[2][Reflection]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{proposition}[2][Proposition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+ 
+% --------------------------------------------------------------
+%                         Start here
+% --------------------------------------------------------------
+ 
+%\renewcommand{\qedsymbol}{\filledbox}
+ 
+\title{Big Data Computing - $4^{th}$ Homework Report}
+\author{Boem Davide, ID: 1176946, \texttt{davide.boem@studenti.unipd.it} \and Boscaro Nicola, ID: 1181356, \texttt{nicola.boscaro.1@studenti.unipd.it} \and Faccin Dario, ID: 1177736, \texttt{dario.faccin@studenti.unipd.it}}
+\date{}
+ 
+\maketitle
+
+% $^{\circ}$
+
+In this report we've briefly described the results obtained by running our code, on \textit{Cloud Veneto},that we've written for the $4^{th}$ homework.
+
+\section{Results}
+
+In Table \ref{tab:results} you can see what we have obtained running our code on \textit{Cloud Veneto}\footnote{We decided to round the average distances to 4 decimal places.}.
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{c || p{1.5cm} | p{1.5cm} | c | c | p{1.7cm} | p{2.2cm} | p{1.5cm} | p{2cm} }
+    & \textbf{Cores used by application} & \textbf{Cores used for each executor} & \textbf{numBlocks} & \textbf{k} & \textbf{Coreset construction (ms)} & \textbf{Computation final solution (ms)} & \textbf{Average distance} & \textbf{Dataset (Approximate size)}\\
+\hline\hline
+\textbf{1} & \centering 50 & \centering 4 & 12 & 30 &  &  &  & \multirow{11}{*}{\centering\texttt{500000}}\\
+\textbf{2} & \centering 50 & \centering 4 & 12 & 20 &  &  &  & \\
+\textbf{3} & \centering 20 & \centering 2 & 12 & 30 & \centering 74394 & \centering 101 & \centering 8.7761 & \\
+\textbf{4} & \centering 20 & \centering 2 & 12 & 20 & \centering 216547 & \centering 85 & \centering 8.9701 & \\
+\textbf{5} & \centering 20 & \centering 2 & 25 & 20 & \centering 20786 & \centering 136 & \centering 8.8788 & \\
+\textbf{6} & \centering 20 & \centering 2 & 5 & 20 & \centering 21123 & \centering 39 & \centering 8.8486 & \\
+\textbf{7} & \centering 10 & \centering 4 & 5 & 20 & \centering 17721 & \centering 22 & \centering 8.9782 & \\
+\textbf{8} & \centering 10 & \centering 1 & 12 & 30 & \centering 19158 & \centering 234 & \centering 8.7899 & \\
+\textbf{9} & \centering 10 & \centering 1 & 12 & 20 & \centering 29196 & \centering 50 & \centering 8.8988 & \\
+\textbf{10} & \centering 10 & \centering 1 & 25 & 20 & \centering 55043 & \centering 127 & \centering 8.9163 & \\
+\textbf{11} & \centering 10 & \centering 1 & 5 & 20 & \centering 28766 & \centering 22 & \centering 9.0405 & \\
+\hline
+\textbf{12} &  &  &  &  &  &  &  & \\
+
+  \end{tabularx}
+  \caption{Results obtained on \textit{Cloud Veneto}} \label{tab:results}
+\end{table}
+
+\section{Plots}
+
+\section{Conclusions}
+
+%\begin{figure}[!h]
+%\centering%
+%\subfigure[\protect\url{road_and_sign.png}\label{src}]%
+%{\includegraphics[scale = 0.35]{images/road_and_sign.eps}}\qquad\qquad
+%\subfigure[\protect\url{src_after_canny.png}\label{srcCanny}]%
+%{\includegraphics[scale = 0.35]{images/src_after_canny.eps}}\qquad\qquad
+%\subfigure[\protect\url{src_after_hough.png}\label{srcHough}]%
+%{\includegraphics[scale = 0.35]{images/src_after_hough.eps}}\qquad\qquad
+%\subfigure[\protect\url{src_final.png}\label{final}]%
+%{\includegraphics[scale = 0.35]{images/src_final.eps}}
+%\caption{In this set of pictures we can see what the different methods in the program have done: \ref{src} is the source image, \ref{srcCanny} is the grayscale version of the source image in which I've applied the \textit{Canny()} method, \ref{srcHough} is the same image as \ref{srcCanny} where I've applied the methods \textit{HoughLines()} and \textit{HoughCircles()}, and in the end we have \ref{final} where there is what it's been asked by the assignment.\label{fig:imgresults}}
+%\end{figure}
+
+%\begin{thebibliography}{9}
+%\bibitem{HoughCircle} 
+%Hough Circle Transform,
+%\\\texttt{https://docs.opencv.org/3.4.1/d4/d70/tutorial\_hough\_circle.html}
+%\end{thebibliography}
+
+%\begin{figure}[htbp]
+%\centering
+%\includegraphics[width=35mm]{eps/airplane.eps}% "%" necessario
+%\qquad\qquad
+%\includegraphics[width=45mm]{eps/lena.eps}
+%\caption{Didascalia comune alle due figure}
+%\end{figure}
+
+
+
+% --------------------------------------------------------------
+%     You don't have to mess with anything below this line.
+% --------------------------------------------------------------
+ 
+\end{document}
