@@ -57,8 +57,8 @@ In Table \ref{tab:results} you can see what we have obtained running our code on
   \begin{tabularx}{\textwidth}{c || p{1.5cm} | p{1.5cm} | c | c | p{1.7cm} | p{2.2cm} | p{1.5cm} | p{2cm} }
     & \textbf{Cores used by application} & \textbf{Cores used for each executor} & \textbf{numBlocks} & \textbf{k} & \textbf{Coreset construction (ms)} & \textbf{Computation final solution (ms)} & \textbf{Average distance} & \textbf{Dataset (Approximate size)}\\
 \hline\hline
-\textbf{1} & \centering 50 & \centering 4 & 12 & 30 &  &  &  & \multirow{11}{*}{\centering\texttt{500000}}\\
-\textbf{2} & \centering 50 & \centering 4 & 12 & 20 &  &  &  & \\
+\textbf{1} & \centering 50 & \centering 4 & 12 & 30 & \centering 59869 & \centering 128 & \centering 8.7856 & \multirow{11}{*}{\centering\texttt{500000}}\\
+\textbf{2} & \centering 50 & \centering 4 & 12 & 20 & \centering 101217 & \centering 71 & \centering 8.8655 & \\
 \textbf{3} & \centering 20 & \centering 2 & 12 & 30 & \centering 74394 & \centering 101 & \centering 8.7761 & \\
 \textbf{4} & \centering 20 & \centering 2 & 12 & 20 & \centering 216547 & \centering 85 & \centering 8.9701 & \\
 \textbf{5} & \centering 20 & \centering 2 & 25 & 20 & \centering 20786 & \centering 136 & \centering 8.8788 & \\
@@ -80,6 +80,11 @@ In Table \ref{tab:results} you can see what we have obtained running our code on
 \textbf{20} & \centering 10 & \centering 1 & 12 & 20 & \centering 136337 & \centering 94 & \centering 9.9745 & \\ 
 \textbf{21} & \centering 10 & \centering 1 & 25 & 20 & \centering 145994 & \centering 207 & \centering 10.1882 & \\ 
 \textbf{22} & \centering 10 & \centering 1 & 5 & 20 & \centering 197308 & \centering 54 & \centering 10.1459 & \\ 
+\hline
+\textbf{23} & \centering - & \centering - & 12 & 30 & \centering 11021 & \centering 66 & \centering 8.6162 & \multirow{4}{*}{\centering\texttt{500000} on PC}\\
+\textbf{24} & \centering - & \centering - & 12 & 20 & \centering 7079 & \centering 30 & \centering 8.7742 & \\
+\textbf{25} & \centering - & \centering - & 25 & 20 & \centering 6780 & \centering 80 & \centering 8.7115 & \\
+\textbf{26} & \centering - & \centering - & 5 & 20 & \centering 7012 & \centering 6 & \centering 8.7778 & \\
 
   \end{tabularx}
   \caption{Results obtained on \textit{Cloud Veneto}} \label{tab:results}
@@ -88,6 +93,9 @@ In Table \ref{tab:results} you can see what we have obtained running our code on
 \section{Plots}
 
 \section{Conclusions}
+
+To support our hypothesis that the \textit{Coreset construction} column is uncorrect, I've tried to re-run row 14 in another moment and the results were: \textit{55769; 111; 9.8361}.
+
 Da scrivere in inglese in una forma \textit{pi\`{u} meglio}:
 
 In generale: l'average distance risulta a grandi linee costante tra le varie prove con lo stesso dataset. Eventuali eccezioni a quanto detto sotto sono prevalentemente nel tempo del Coreset Construction e ipotizzo siano dovute al "traffico" presente sul cloud (tempo che ci impiega a "iniziare" il programma).
