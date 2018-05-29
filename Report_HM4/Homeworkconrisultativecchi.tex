@@ -94,12 +94,19 @@ In Table \ref{tab:results} you can see what we have obtained running our code on
 
 \section{Conclusions}
 
-Osservando le tabelle con i risultati possiamo notare come mentre nella colonna Coreset Construction abbiamo dei tempi che oscillano in un certo intervallo, nel caso della colonna Computation of final solution abbiamo una proporzionalità diretta con l'aumentare di k o numBlocks.
+To support our hypothesis that the \textit{Coreset construction} column is uncorrect, I've tried to re-run row 14 in another moment and the results were: \textit{55769; 111; 9.8361}.
 
-Discorso a parte per l'Average Distance che parte alta e diminuisce fino a raggiungere un comportamento asintotico.
+Da scrivere in inglese in una forma \textit{pi\`{u} meglio}:
 
-Per quanto riguarda invece il numero di core utilizzati abbiamo verificato che
+In generale: l'average distance risulta a grandi linee costante tra le varie prove con lo stesso dataset. Eventuali eccezioni a quanto detto sotto sono prevalentemente nel tempo del Coreset Construction e ipotizzo siano dovute al "traffico" presente sul cloud (tempo che ci impiega a "iniziare" il programma).
 
+Considerazioni su Cores used by application e Cores used for each executor:
+
+Escludendo i risultati in cui si usano pi\`{u} cores used by application che risentono nel tempo di coreset construction a causa del "traffico" nel Cloud, si pu\`{o} notare, a parità di numBlocks e k, un maggior tempo impiegato nel Coreset Construction (come si poteva immaginare). Per quanto riguarda invece la Computation final solution il risultato è più variabile.
+
+Considerazioni riguardo numBlocks e k:
+
+Al diminuire di numBlocks diminuisce il tempo del Coreset construction e del Computation final solution. Diminuendo k invece aumenta il tempo del Coreset construction e diminuisce quello del Computation final solution.
 %\begin{figure}[!h]
 %\centering%
 %\subfigure[\protect\url{road_and_sign.png}\label{src}]%

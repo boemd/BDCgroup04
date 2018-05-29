@@ -54,9 +54,9 @@ public class G04HM4 {
         catch (IOException e) { System.err.println(e);
         }
         BufferedWriter w = new BufferedWriter(d);
-        numBlocks = 12;
+        k = 20;
 
-        for (k=10; k<= 200; k=k+10) {
+        for (numBlocks=10; numBlocks<= 200; numBlocks=numBlocks+10) {
             ArrayList<Vector> out = runMapReduce(pointsrdd, k, numBlocks, w);
 
             double dst = measure(out);
@@ -89,8 +89,8 @@ public class G04HM4 {
      *      with input coreset and k. The code of the sequential algorithm can be downloaded here.
      */
 
-    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks, BufferedWriter w) {
-        // (a)
+    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks , BufferedWriter w) {
+        // (a-b)
         Random r = new Random();
         long t0 = System.currentTimeMillis();
         List<ArrayList<Vector>> a = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector)))
@@ -105,6 +105,7 @@ public class G04HM4 {
                 .map( (tupla) -> tupla._2)
                 .collect();
 
+        // (c)
         ArrayList<Vector> coreset = new ArrayList<>();
 
         ListIterator<ArrayList<Vector>> iter = a.listIterator();
@@ -117,10 +118,10 @@ public class G04HM4 {
         }
         long t1 = System.currentTimeMillis();
         System.out.println();
-        System.out.println("K is : " + k);
+        System.out.println("numBlocks is : " + numBlocks);
         System.out.println("Time taken by the coreset construction: " + (t1-t0) + " ms.");
         try {
-            w.write("K is : " + k);
+            w.write("numBlocks is : " + numBlocks);
             w.newLine();
             w.write("Time taken by the coreset construction: " + (t1 - t0) + " ms." + "\r\n");
         }
