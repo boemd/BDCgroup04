@@ -9,9 +9,10 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
-import org.codehaus.commons.nullanalysis.NotNull;
 import scala.Tuple2;
 
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -36,22 +37,43 @@ public class G04HM4 {
 
         int numBlocks, k;
 
-        Scanner in = new Scanner(System.in);
-        System.out.println("Insert the value of numBlocks and k.");
-        System.out.println("Insert the value of numBlocks:");
-        numBlocks = in.nextInt();
-        System.out.println("Insert the value of k:");
-        k = in.nextInt();
-        in.close();
+        //Scanner in = new Scanner(System.in);
+        //System.out.println("Insert the value of numBlocks and k.");
+        //System.out.println("Insert the value of numBlocks:");
+        //numBlocks = in.nextInt();
+        // System.out.println("Insert the value of k:");
+        // k = in.nextInt();
+        // in.close();
 
         // Create JavaRDD from input path
         JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).cache();
+        pointsrdd.count();
+        FileWriter d = null;
+        try { d = new FileWriter("output_HM4.txt");
+        }
+        catch (IOException e) { System.err.println(e);
+        }
+        BufferedWriter w = new BufferedWriter(d);
+        numBlocks = 12;
 
-        ArrayList<Vector> out = runMapReduce(pointsrdd,k,numBlocks);
+        for (k=10; k<= 200; k=k+10) {
+            ArrayList<Vector> out = runMapReduce(pointsrdd, k, numBlocks, w);
 
-        double dst = measure(out);
-        System.out.println("The average distance among the solution points is: "+dst);
-
+            double dst = measure(out);
+            System.out.println("The average distance among the solution points is: " + dst);
+            try {
+                w.write("The average distance among the solution points is: " + dst + "\r\n");
+                w.newLine();
+            } catch (IOException e) {
+                System.err.println(e);
+            }
+        }
+        try {
+            w.flush();
+            d.close();
+        } catch (IOException e) {
+            System.err.println(e);
+        }
     }
 
     /**
@@ -67,7 +89,7 @@ public class G04HM4 {
      *      with input coreset and k. The code of the sequential algorithm can be downloaded here.
      */
 
-    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks) {
+    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks, BufferedWriter w) {
         // (a)
         Random r = new Random();
         long t0 = System.currentTimeMillis();
@@ -85,7 +107,6 @@ public class G04HM4 {
 
         ArrayList<Vector> coreset = new ArrayList<>();
 
-
         ListIterator<ArrayList<Vector>> iter = a.listIterator();
         while(iter.hasNext()){
             ListIterator ali = iter.next().listIterator();
@@ -96,52 +117,24 @@ public class G04HM4 {
         }
         long t1 = System.currentTimeMillis();
         System.out.println();
-        System.out.println("Time taken by the coreset construction: " + (t1-t0) + "ms.");
+        System.out.println("K is : " + k);
+        System.out.println("Time taken by the coreset construction: " + (t1-t0) + " ms.");
+        try {
+            w.write("K is : " + k);
+            w.newLine();
+            w.write("Time taken by the coreset construction: " + (t1 - t0) + " ms." + "\r\n");
+        }
+        catch (IOException e) { System.err.println(e); }
 
+        long t2 = System.currentTimeMillis();
         ArrayList<Vector> finalClustering = runSequential(coreset, k);
-
-        long t2 = System.currentTimeMillis();
-        System.out.println("Time taken by the computation of the final solution: " + (t2-t1) + " ms.");
+        long t3 = System.currentTimeMillis();
+        System.out.println("Time taken by the computation of the final solution: " + (t3-t2) + " ms.");
+        try {
+            w.write("Time taken by the computation of the final solution: " + (t3-t2) + " ms." + "\r\n");
+        }
+        catch (IOException e) { System.err.println(e); }
         return finalClustering;
-    }
-
-    @Deprecated
-    static ArrayList<Vector> rmr(JavaRDD<Vector> pointsrdd, int k, int numBlocks){
-
-        Long t0 = System.currentTimeMillis();
-
-        Random r = new Random();
-        JavaPairRDD<Integer, Vector> p1 = pointsrdd.mapToPair( (vector) -> (new Tuple2<Integer, Vector> (r.nextInt(numBlocks), vector)));
-        JavaPairRDD<Integer, Iterable<Vector> > p2 = p1.groupByKey();
-
-        JavaPairRDD<Integer, ArrayList<Vector>> p3 = p2.mapToPair((itbl) -> {
-            Iterator<Vector> iter = itbl._2().iterator();
-            ArrayList<Vector> vectors_list = new ArrayList<>();
-            while(iter.hasNext()){
-                vectors_list.add(iter.next());
-            }
-            ArrayList<Vector> ret = kcenter(vectors_list, k);
-            return new Tuple2<>(0, ret);
-        });
-        JavaPairRDD<Integer, ArrayList<Vector>> p4 = p3.reduceByKey((x,y)-> {
-            ListIterator<Vector> iter = y.listIterator();
-            while(iter.hasNext()){
-                x.add(iter.next());
-            }
-            return x;
-        });
-        JavaRDD<ArrayList<Vector>> p5 = p4.map(x -> x._2());
-        ArrayList<Vector> coreset = new ArrayList(p5.collect());
-
-        long t1 = System.currentTimeMillis();
-        System.out.println("Time taken by the coreset construction: " + (t1-t0) + "ms.");
-
-        ArrayList<Vector> output = runSequential(coreset, k);
-
-        long t2 = System.currentTimeMillis();
-        System.out.println("Time taken by the computation of the final solution: " + (t2-t1) + " ms.");
-
-        return output;
     }
 
     /**
@@ -295,7 +288,3 @@ public class G04HM4 {
         return maxIdx;
     }
 }
-
-
-
-
