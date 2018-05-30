@@ -1,82 +1,60 @@
-% --------------------------------------------------------------
-% This is all preamble stuff that you don't have to worry about.
-% Head down to where it says "Start here"
-% --------------------------------------------------------------
- 
 \documentclass[10pt]{article}
  
-\usepackage[margin=1in]{geometry} 
+\usepackage[margin=1.5cm]{geometry} 
 \usepackage{amsmath,amsthm,amssymb}
-\usepackage{hyperref}
+%\usepackage{hyperref}
 \usepackage{graphicx}
-\usepackage{subfigure}
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage{float}
- 
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\Z}{\mathbb{Z}}
- 
-\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
-\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
-\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
-\newenvironment{reflection}[2][Reflection]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
-\newenvironment{proposition}[2][Proposition]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
-\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
-\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
- 
+\usepackage{subfig}
+
+\setlength{\parindent}{0pt}
+\graphicspath{{./images/}}
+
 \begin{document}
- 
+
 % --------------------------------------------------------------
 %                         Start here
 % --------------------------------------------------------------
- 
-%\renewcommand{\qedsymbol}{\filledbox}
- 
+  
 \title{Big Data Computing - $4^{th}$ Homework Report}
 \author{Boem Davide, ID: 1176946, \texttt{davide.boem@studenti.unipd.it} \and Boscaro Nicola, ID: 1181356, \texttt{nicola.boscaro.1@studenti.unipd.it} \and Faccin Dario, ID: 1177736, \texttt{dario.faccin@studenti.unipd.it}\footnote{Contact email}}
 \date{}
  
 \maketitle
 
-% $^{\circ}$
-
-In this report we've described the results obtained by running our code, on \textit{Cloud Veneto}, that we've written for the $4^{th}$ homework.
+In this report we described the results obtained by running our code, on \textit{Cloud Veneto}, for the $4^{th}$ homework.
 
 \section{Results}
 
-In the Tables \ref{tab:results1} - \ref{tab:results6}, you can see what we have obtained running our code on \textit{Cloud Veneto}\footnote{We decided to round the average distances to 4 decimal places.}.
+In Table \ref{tab:results1} you can see what we have obtained running our code on \textit{Cloud Veneto}\footnote{We decided to round the average distances to 4 decimal places.}.
 
 \begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{c || p{1.5cm} | p{1.5cm} | c | c | p{1.7cm} | p{2.2cm} | p{1.5cm} | p{2cm} }
     & \textbf{Cores used by application} & \textbf{Cores used for each executor} & \textbf{numBlocks} & \textbf{k} & \textbf{Coreset construction (ms)} & \textbf{Computation final solution (ms)} & \textbf{Average distance} & \textbf{Dataset (Approximate size)}\\
 \hline\hline
-\textbf{1} & \centering 20 & \centering 4 & 12 & 10 & \centering 26519 & \centering 24 & \centering 10,5483 & \multirow{20}{*}{\centering\texttt{all}}\\
-\textbf{2} & \centering 20 & \centering 4 & 12 & 20 & \centering 32341 & \centering 109 & \centering 10,0850 & \\
-\textbf{3} & \centering 20 & \centering 4 & 12 & 30 & \centering 26723 & \centering 174 & \centering 9,8213 & \\
-\textbf{4} & \centering 20 & \centering 4 & 12 & 40 & \centering 52159 & \centering 155 & \centering 9,6639 & \\
+\textbf{1} & \centering 20 & \centering 4 & 12 & 10 & \centering 26519 & \centering 24 & \centering 10,5483 & \multirow{10}{*}{\centering\texttt{all}}\\
+\textbf{2} & \centering 20 & \centering 4 & 12 & 20 & \centering 25519 & \centering 40 & \centering 9,9642 & \\
+\textbf{3} & \centering 20 & \centering 4 & 12 & 30 & \centering 23942 & \centering 70 & \centering 9,7861 & \\
+\textbf{4} & \centering 20 & \centering 4 & 12 & 40 & \centering 25159 & \centering 155 & \centering 9,6639 & \\
 \textbf{5} & \centering 20 & \centering 4 & 12 & 50 & \centering 23727 & \centering 297 & \centering 9,5462 & \\
 \textbf{6} & \centering 20 & \centering 4 & 12 & 60 & \centering 30821 & \centering 449 & \centering 9,4961 & \\
 \textbf{7} & \centering 20 & \centering 4 & 12 & 70 & \centering 25678 & \centering 726 & \centering 9,3317 & \\
 \textbf{8} & \centering 20 & \centering 4 & 12 & 80 & \centering 27404 & \centering 1060 & \centering 9,3204 & \\
 \textbf{9} & \centering 20 & \centering 4 & 12 & 90 & \centering 37561 & \centering 1527 & \centering 9,2578 & \\
 \textbf{10} & \centering 20 & \centering 4 & 12 & 100 & \centering 32148 & \centering 2122 & \centering 9,1879 & \\
-\textbf{11} & \centering 20 & \centering 4 & 12 & 110 & \centering 68265 & \centering 2818 & \centering 9,1743 & \\
-\textbf{12} & \centering 20 & \centering 4 & 12 & 120 & \centering 73367 & \centering 3578 & \centering 9,1061 & \\
-\textbf{13} & \centering 20 & \centering 4 & 12 & 130 & \centering 59042 & \centering 4454 & \centering 9,0946 & \\
-\textbf{14} & \centering 20 & \centering 4 & 12 & 140 & \centering 62462 & \centering 5745 & \centering 9,0689 & \\
-\textbf{15} & \centering 20 & \centering 4 & 12 & 150 & \centering 48574 & \centering 8027 & \centering 9,0431 & \\
-\textbf{16} & \centering 20 & \centering 4 & 12 & 160 & \centering 36865 & \centering 12089 & \centering 9,0115 & \\
-\textbf{17} & \centering 20 & \centering 4 & 12 & 170 & \centering 56385 & \centering 11927 & \centering 8,9946 & \\
-\textbf{18} & \centering 20 & \centering 4 & 12 & 180 & \centering 52730 & \centering 12659 & \centering 8,9458 & \\
-\textbf{19} & \centering 20 & \centering 4 & 12 & 190 & \centering 69069 & \centering 14400 & \centering 8,9466 & \\ 
-\textbf{20} & \centering 20 & \centering 4 & 12 & 200 & \centering 82165 & \centering 16747 & \centering 8,9113 & \\
+%\textbf{11} & \centering 20 & \centering 4 & 12 & 110 & \centering 68265 & \centering 2818 & \centering 9,1743 & \\
+%\textbf{12} & \centering 20 & \centering 4 & 12 & 120 & \centering 73367 & \centering 3578 & \centering 9,1061 & \\
+%\textbf{13} & \centering 20 & \centering 4 & 12 & 130 & \centering 59042 & \centering 4454 & \centering 9,0946 & \\
+%\textbf{14} & \centering 20 & \centering 4 & 12 & 140 & \centering 62462 & \centering 5745 & \centering 9,0689 & \\
+%\textbf{15} & \centering 20 & \centering 4 & 12 & 150 & \centering 48574 & \centering 8027 & \centering 9,0431 & \\
+%\textbf{16} & \centering 20 & \centering 4 & 12 & 160 & \centering 36865 & \centering 12089 & \centering 9,0115 & \\
+%\textbf{17} & \centering 20 & \centering 4 & 12 & 170 & \centering 56385 & \centering 11927 & \centering 8,9946 & \\
+%\textbf{18} & \centering 20 & \centering 4 & 12 & 180 & \centering 52730 & \centering 12659 & \centering 8,9458 & \\
+%\textbf{19} & \centering 20 & \centering 4 & 12 & 190 & \centering 69069 & \centering 14400 & \centering 8,9466 & \\ 
+%\textbf{20} & \centering 20 & \centering 4 & 12 & 200 & \centering 82165 & \centering 16747 & \centering 8,9113 & \\
   \end{tabularx}
   \caption{Results obtained on \textit{Cloud Veneto}, using dataset \texttt{vectors-50-all.txt.bz2} and changing $k$.} \label{tab:results1}
 \end{table}
@@ -100,6 +78,7 @@ In the Tables \ref{tab:results1} - \ref{tab:results6}, you can see what we have 
   \caption{Results obtained on \textit{Cloud Veneto}, using dataset \texttt{vectors-50-2000000.txt.bz2} and changing $k$.} \label{tab:results2}
 \end{table}
 
+\iffalse
 \begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{c || p{1.5cm} | p{1.5cm} | c | c | p{1.7cm} | p{2.2cm} | p{1.5cm} | p{2cm} }
@@ -185,48 +164,29 @@ In the Tables \ref{tab:results1} - \ref{tab:results6}, you can see what we have 
   \end{tabularx}
   \caption{Results obtained on \textit{Cloud Veneto}, using dataset \texttt{vectors-50-all.txt.bz2} and changing $Y$.} \label{tab:results6}
 \end{table}
+\fi
+
 
 \section{Plots}
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=8cm]{maxdivdst}
+	\caption{Max diversity distance computed for two datasets.}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\subfloat[Times for 5 millions vectors.]{\includegraphics[width=8cm]{times_all_vects}}
+	\subfloat[Times for 2 millions vectors.]{\includegraphics[width=8cm]{times_2M_vects}}
+	\caption{Execution times for two datasets.}
+\end{figure}
+
 \section{Conclusions}
 
-Looking at the results (see Tables \ref{tab:results1} - \ref{tab:results6}), we can see that, while the measured time for the \textit{Construction of the coreset} stayed inside a time interval, the time spent by the program for the \textit{Computation of the final solution} had risen proportionally with the values of $k$ and of $numBlocks$.
+Looking at the results (see Table \ref{tab:results1}), we can see that, while the measured time for the \textit{Construction of the coreset} remains almost inside a time interval, the time spent by the program for the \textit{Computation of the final solution} rises proportionally with the values of $k$ and of $numBlocks$.
 
-On the contrary, the \textit{Average distance} started with bigger values and converged after a while to lower values.
+On the contrary, the \textit{Average distance} starts with bigger values and converges after a while to lower values.
 
 In the case of the total number of cores used by the application ($X$) we observed that there was a little improvement in the measured time of the \textit{Construction of the coreset}, meanwhile, modifying the number of cores used for each executor ($Y$) we didn't see any enhancement.
-
-%\begin{figure}[!h]
-%\centering%
-%\subfigure[\protect\url{road_and_sign.png}\label{src}]%
-%{\includegraphics[scale = 0.35]{images/road_and_sign.eps}}\qquad\qquad
-%\subfigure[\protect\url{src_after_canny.png}\label{srcCanny}]%
-%{\includegraphics[scale = 0.35]{images/src_after_canny.eps}}\qquad\qquad
-%\subfigure[\protect\url{src_after_hough.png}\label{srcHough}]%
-%{\includegraphics[scale = 0.35]{images/src_after_hough.eps}}\qquad\qquad
-%\subfigure[\protect\url{src_final.png}\label{final}]%
-%{\includegraphics[scale = 0.35]{images/src_final.eps}}
-%\caption{In this set of pictures we can see what the different methods in the program have done: \ref{src} is the source image, \ref{srcCanny} is the grayscale version of the source image in which I've applied the \textit{Canny()} method, \ref{srcHough} is the same image as \ref{srcCanny} where I've applied the methods \textit{HoughLines()} and \textit{HoughCircles()}, and in the end we have \ref{final} where there is what it's been asked by the assignment.\label{fig:imgresults}}
-%\end{figure}
-
-%\begin{thebibliography}{9}
-%\bibitem{HoughCircle} 
-%Hough Circle Transform,
-%\\\texttt{https://docs.opencv.org/3.4.1/d4/d70/tutorial\_hough\_circle.html}
-%\end{thebibliography}
-
-%\begin{figure}[htbp]
-%\centering
-%\includegraphics[width=35mm]{eps/airplane.eps}% "%" necessario
-%\qquad\qquad
-%\includegraphics[width=45mm]{eps/lena.eps}
-%\caption{Didascalia comune alle due figure}
-%\end{figure}
-
-
-
-% --------------------------------------------------------------
-%     You don't have to mess with anything below this line.
-% --------------------------------------------------------------
- 
 \end{document}
