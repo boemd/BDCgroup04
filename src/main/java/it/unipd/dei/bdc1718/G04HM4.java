@@ -1,10 +1,8 @@
 package it.unipd.dei.bdc1718;
 
-import org.apache.commons.collections.iterators.ArrayListIterator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Vector;
@@ -22,7 +20,6 @@ public class G04HM4 {
             throw new IllegalArgumentException("Expecting the file name on the command line");
         }
         String path = args[0];
-        // int k = Integer.parseInt(args[1]);
 
         Logger.getLogger("org").setLevel(Level.OFF);
         Logger.getLogger("akka").setLevel(Level.OFF);
@@ -30,50 +27,24 @@ public class G04HM4 {
         SparkConf conf = new SparkConf(true).setAppName("Fourth Homework");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        // Load a text file into an RDD of strings, where each string corresponds to a distinct line (document) of the file
-        int numPartitions = sc.defaultParallelism();
-
-        // int numBlocks = 72*8*2;
-
         int numBlocks, k;
 
-        //Scanner in = new Scanner(System.in);
-        //System.out.println("Insert the value of numBlocks and k.");
-        //System.out.println("Insert the value of numBlocks:");
-        //numBlocks = in.nextInt();
-        // System.out.println("Insert the value of k:");
-        // k = in.nextInt();
-        // in.close();
+        Scanner in = new Scanner(System.in);
+        System.out.println("Insert the value of numBlocks and k.");
+        System.out.println("Insert the value of numBlocks:");
+        numBlocks = in.nextInt();
+        System.out.println("Insert the value of k:");
+        k = in.nextInt();
+        in.close();
 
         // Create JavaRDD from input path
         JavaRDD<Vector> pointsrdd = InputOutput.readVectors(sc,path).cache();
         pointsrdd.count();
-        FileWriter d = null;
-        try { d = new FileWriter("output_HM4.txt");
-        }
-        catch (IOException e) { System.err.println(e);
-        }
-        BufferedWriter w = new BufferedWriter(d);
-        k = 20;
 
-        for (numBlocks=10; numBlocks<= 200; numBlocks=numBlocks+10) {
-            ArrayList<Vector> out = runMapReduce(pointsrdd, k, numBlocks, w);
+        ArrayList<Vector> out = runMapReduce(pointsrdd, k, numBlocks);
 
-            double dst = measure(out);
-            System.out.println("The average distance among the solution points is: " + dst);
-            try {
-                w.write("The average distance among the solution points is: " + dst + "\r\n");
-                w.newLine();
-            } catch (IOException e) {
-                System.err.println(e);
-            }
-        }
-        try {
-            w.flush();
-            d.close();
-        } catch (IOException e) {
-            System.err.println(e);
-        }
+        double dst = measure(out);
+        System.out.println("The average distance among the solution points is: " + dst);
     }
 
     /**
@@ -89,7 +60,7 @@ public class G04HM4 {
      *      with input coreset and k. The code of the sequential algorithm can be downloaded here.
      */
 
-    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks , BufferedWriter w) {
+    static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks) {
         // (a-b)
         Random r = new Random();
         long t0 = System.currentTimeMillis();
@@ -117,30 +88,21 @@ public class G04HM4 {
             }
         }
         long t1 = System.currentTimeMillis();
-        System.out.println();
-        System.out.println("numBlocks is : " + numBlocks);
         System.out.println("Time taken by the coreset construction: " + (t1-t0) + " ms.");
-        try {
-            w.write("numBlocks is : " + numBlocks);
-            w.newLine();
-            w.write("Time taken by the coreset construction: " + (t1 - t0) + " ms." + "\r\n");
-        }
-        catch (IOException e) { System.err.println(e); }
 
+        // (d)
         long t2 = System.currentTimeMillis();
         ArrayList<Vector> finalClustering = runSequential(coreset, k);
         long t3 = System.currentTimeMillis();
         System.out.println("Time taken by the computation of the final solution: " + (t3-t2) + " ms.");
-        try {
-            w.write("Time taken by the computation of the final solution: " + (t3-t2) + " ms." + "\r\n");
-        }
-        catch (IOException e) { System.err.println(e); }
         return finalClustering;
     }
 
     /**
      * Second method required by the assignment
      * measure(pointslist)
+     * A method measure(pointslist) that receives in input a set of points represented by an ArrayList<Vector>
+     * pointslist and returns a double which is the average distance between all points in pointslist
      */
     private static double measure(ArrayList<Vector> pointslist) {
 
